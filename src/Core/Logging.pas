@@ -5,11 +5,14 @@ interface
 
   procedure LogSetPath(const dir: string);
   procedure LogWrite(const line, fileName: string);
-  procedure LogPurge(const fileName: string);
+
+type
+  TAsyncLogCallback = procedure(fileName, msg: string); stdcall;
 
 var
   G_SavePath: string;
   G_DisableLog: boolean;
+  G_OnLog : TAsyncLogCallback;
 
 implementation
 
@@ -22,24 +25,25 @@ implementation
   var
     lines: TStringList;
   begin
-    if G_DisableLog then
+    if (G_DisableLog) then
       Exit;
 
-    lines := TStringList.Create;
-    if (FileExists(G_Savepath + '\' + fileName)) then
-      lines.LoadFromFile(G_Savepath + '\' + fileName);
-    lines.Add(TimeToStr(NOW) + '|' + line);
-    lines.SaveToFile(G_Savepath + '\' + fileName);
-    lines.Destroy;
-  end;
+    if (G_SavePath <> '') then
+    begin
 
-  procedure LogPurge(const fileName: string);
-  var
-    lines: TStringList;
-  begin
-    lines := TStringList.Create;
-    lines.SaveToFile(G_Savepath + '\' + fileName);
-    lines.Destroy;
+      lines := TStringList.Create;
+      if (FileExists(G_Savepath + '\' + fileName)) then
+        lines.LoadFromFile(G_Savepath + '\' + fileName);
+      lines.Add(TimeToStr(NOW) + '|' + line);
+      lines.SaveToFile(G_Savepath + '\' + fileName);
+      lines.Destroy;
+    end;
+
+    if (@G_OnLog <> nil) then
+    begin
+      G_OnLog(fileName, line);
+    end;
+
   end;
 
 end.

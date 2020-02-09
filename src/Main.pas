@@ -23,6 +23,7 @@ interface
   procedure InternalSetOnOperationChangeCallback(input : Pointer); stdcall;
   procedure InternalSetOnProgressCallback(input : Pointer); stdcall;
   procedure InternalSetOnRequestBufferCallback(input: Pointer); stdcall;
+  procedure InternalSetOnLogCallback(input: Pointer); stdcall;
 
   procedure InternalInitializePlugin(directory, filename: PChar); stdcall;
   procedure InternalInitializeLibrary; stdcall;
@@ -132,6 +133,10 @@ implementation
   begin
     @G_OnReqBuffer := input;
   end;
+  procedure InternalSetOnLogCallback(input: Pointer); stdcall;
+  begin
+    @G_OnLog := input;
+  end;
   procedure InternalSetBufferSavePathString(str: PChar); stdcall;
   begin
     if (str = nil) then G_BufferPath := ''
@@ -176,6 +181,11 @@ implementation
   end;
   procedure InternalUpdateParameterDependencies; stdcall;
   begin
+    if G_SizeX <= 0 then G_SizeX := G_Flame.Width;
+    if G_SizeY <= 0 then G_SizeY := G_Flame.Height;
+    if G_Oversample <= 0 then G_Oversample := G_Flame.spatial_oversample;
+    
+
     G_Flame.AdjustScale(G_SizeX, G_SizeY);
     G_Flame.Width := G_SizeX;
     G_Flame.Height := G_SizeY;
@@ -404,7 +414,6 @@ implementation
 
     try
       G_Renderer.Render;
-      LogWrite('INFO|Returning control to host application', 'general.log');
     except on exc : Exception do
       begin
         LogWrite('ERROR|' + exc.Message, 'general.log');
@@ -430,7 +439,6 @@ implementation
 
     try
       G_Renderer.IntermediateSample(G_ImageMaker);
-      LogWrite('INFO|Returning control to host application', 'general.log');
     except on exc : Exception do
       begin
         LogWrite('ERROR|' + exc.Message, 'general.log');
@@ -465,7 +473,6 @@ implementation
       //G_Renderer.BufferPath := '';
 
       G_Renderer.ProcessBuffer(G_SamplesPerPixel);
-      LogWrite('INFO|Returning control to host application', 'general.log');
     except on exc : Exception do
       begin
         LogWrite('ERROR|' + exc.Message, 'general.log');
