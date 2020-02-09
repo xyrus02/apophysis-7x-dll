@@ -139,6 +139,10 @@ uses
   begin
     InternalSetOnRequestBufferCallback(input);
   end;
+  procedure EventsSetOnLogCallback(input : Pointer); stdcall; export;
+  begin
+    InternalSetOnLogCallback(input);
+  end;
 
   procedure ApophysisSetThreadingLevel(nthreads: integer); stdcall; export;
   begin
@@ -297,6 +301,7 @@ exports
   EventsSetOnOperationChangeCallback,
   EventsSetOnProgressCallback,
   EventsSetOnRequestBufferCallback,
+  EventsSetOnLogCallback,
 
   FLName,
   FLVibrancy,
