@@ -12,7 +12,6 @@ interface
   procedure InternalSetThreadingLevel(nthreads: integer); stdcall;
   procedure InternalSetParameterString(input : PChar); stdcall;
   procedure InternalSetBufferSavePathString(str: PChar); stdcall;
-  procedure InternalSetPluginSearchPathString(str: PChar); stdcall;
   procedure InternalSetLogEnabled(input: integer); stdcall;
   procedure InternalSetLogSavePathString(str: PChar); stdcall;
   procedure InternalSetOutputDimensions(x, y : integer); stdcall;
@@ -64,7 +63,6 @@ var
 
   G_BufferPath : String;
   G_LogPath : String;
-  G_PluginPath : String;
   G_ImagePath : String;
   G_AlphaPath : String;
 
@@ -138,11 +136,6 @@ implementation
   begin
     if (str = nil) then G_BufferPath := ''
     else G_BufferPath := str;
-  end;
-  procedure InternalSetPluginSearchPathString(str: PChar); stdcall;
-  begin
-    if (str = nil) then G_PluginPath := ''
-    else G_PluginPath := str;
   end;
   procedure InternalSetLogSavePathString(str: PChar); stdcall;
   begin
