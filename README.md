@@ -274,6 +274,7 @@ Sets the color vibrancy of the target image
 
 **Parameters**
 - *DOUBLE input*: the desired vibrancy
+
 **Return type**
 - void
 
@@ -282,6 +283,7 @@ Recalculate all values which are dependent on other, possibly changed values. Th
 
 **Parameters**
 - none
+
 **Return type**
 - void
 
