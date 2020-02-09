@@ -98,10 +98,6 @@ uses
   begin
     InternalSetParameterString(input);
   end;
-  procedure ParametersSetPluginSearchPathString(input: PChar); stdcall; export;
-  begin
-    InternalSetPluginSearchPathString(input);
-  end;
   procedure ParametersSetLogSavePathString(input: PChar); stdcall; export;
   begin
     InternalSetLogSavePathString(input);
@@ -291,7 +287,6 @@ exports
   ParametersUpdateDependencies,
   ParametersSetParameterString,
   ParametersSetBufferSavePathString,
-  ParametersSetPluginSearchPathString,
   ParametersSetLogSavePathString,
   ParametersSetOutputDimensions,
   ParametersSetSamplingParameters,
