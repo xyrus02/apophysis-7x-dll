@@ -56,14 +56,6 @@ implementation
 uses
   Math;
 
-procedure SinCosA(const Theta: double; var Sin, Cos: double); // to avoid using 'extended' type
-asm
-    FLD     Theta
-    FSINCOS
-    FSTP    qword ptr [edx]    // Cos
-    FSTP    qword ptr [eax]    // Sin
-    FWAIT
-end;
 ///////////////////////////////////////////////////////////////////////////////
 procedure TVariationWedge.Prepare;
 begin
@@ -80,7 +72,7 @@ begin
   a := ArcTan2(FTy^, FTx^) + wedge_swirl * r;
   c := floor((wedge_count * a + PI) * C1_2PI);
   a := a * comp_fac + c * wedge_angle;
-  SinCosA(a, sina, cosa);
+  SinCos(a, sina, cosa);
 
   r := vvar * (r + wedge_hole);
   FPx^ := FPx^ + r * cosa;

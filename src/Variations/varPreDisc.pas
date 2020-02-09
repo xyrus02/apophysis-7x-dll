@@ -55,15 +55,6 @@ uses
 
 { TVariationPreSpherical }
 
-procedure SinCosA(const Theta: double; var Sin, Cos: double); // to avoid using 'extended' type
-asm
-    FLD     Theta
-    FSINCOS
-    FSTP    qword ptr [edx]    // Cos
-    FSTP    qword ptr [eax]    // Sin
-    FWAIT
-end;
-
 ///////////////////////////////////////////////////////////////////////////////
 procedure TVariationPreDisc.Prepare;
 begin
@@ -74,7 +65,7 @@ procedure TVariationPreDisc.CalcFunction;
 var
   r, sinr, cosr: double;
 begin
-  SinCosA(PI * sqrt(sqr(FTx^) + sqr(FTy^)), sinr, cosr);
+  SinCos(PI * sqrt(sqr(FTx^) + sqr(FTy^)), sinr, cosr);
   r := vvar_by_pi * arctan2(FTx^, FTy^);
   FTx^ := sinr * r;
   FTy^ := cosr * r;

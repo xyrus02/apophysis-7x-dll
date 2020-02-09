@@ -30,27 +30,13 @@ uses
 
 const
   variation_name = 'post_curl';
-  num_vars = 3;
-  var_cx_name = 'post_curl_c1';
-  var_cy_name = 'post_curl_c2';
-  var_cz_name = 'post_curl_c3';
+  num_vars = 2;
 
 type
   TVariationPostCurl = class(TBaseVariation)
   private
-    cx, cy, cz: double;
-
-    cx2, cy2, cz2, c2,
-    c2x, c2y, c2z: double;
-
-    procedure CalcCx;
-    procedure CalcCy;
-    procedure CalcCz;
-    procedure CalcLinear;
-
+    c1, c2, c22: double;
   public
-    constructor Create;
-
     class function GetName: string; override;
     class function GetInstance: TBaseVariation; override;
 
@@ -63,7 +49,6 @@ type
 
     procedure Prepare; override;
     procedure CalcFunction; override;
-    procedure GetCalcFunction(var f: TCalcFunction); override;
   end;
 
 implementation
@@ -73,137 +58,28 @@ uses
 
 // TVariationCurl3D
 
-///////////////////////////////////////////////////////////////////////////////
-constructor TVariationPostCurl.Create;
-var
-  rnd: double;
-begin
-  rnd := 2*random - 1;
-
-  // which maniac made this??
-  {case random(3) of
-    0: cx := rnd;
-    1: cy := rnd;
-    2: cz := rnd;
-  end;}
-  cy := 0; cy := 0; cz := 0;
-end;
-
 procedure TVariationPostCurl.Prepare;
 begin
-  c2x := 2 * cx;
-  c2y := 2 * cy;
-  c2z := 2 * cz;
-
-  cx2 := sqr(cx);
-  cy2 := sqr(cy);
-  cz2 := sqr(cz);
-
-  c2 := cx2 + cy2 + cz2;
-end;
-
-///////////////////////////////////////////////////////////////////////////////
-procedure TVariationPostCurl.GetCalcFunction(var f: TCalcFunction);
-begin
-{
-  if IsZero(cx) and IsZero(cy) and IsZero(cz) then f := CalcLinear
-  else
-  if IsZero(cx) and IsZero(cy) then f := CalcCz
-  else
-  if IsZero(cy) and IsZero(cz) then f := CalcCx
-  else
-  if IsZero(cz) and IsZero(cx) then f := CalcCy
-  else
-  f := CalcFunction;
-}
-  if IsZero(cx) then begin
-    if IsZero(cy) then begin
-      if IsZero(cz) then
-        f := CalcLinear
-      else
-        f := CalcCz;
-    end
-    else begin
-      if IsZero(cz) then
-        f := CalcCy
-      else
-        f := CalcFunction;
-    end
-  end
-  else begin
-    if IsZero(cy) and IsZero(cz) then
-      f := CalcCx
-    else
-      f := CalcFunction;
-  end;
-
-  f := CalcFunction;
-
+  c1 := c1 * VVAR;
+  c2 := c2 * VVAR;
+  c22 := 2 * c2;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
 procedure TVariationPostCurl.CalcFunction;
 var
-  r, r2: double;
+  x, y, r, re, im: double;
 begin
-  r2 := sqr(FPx^) + sqr(FPy^) + sqr(FPz^);
-  r := vvar / (r2*c2 + c2x*FPx^ - c2y*FPy^ + c2z*FPz^ + 1);
+  x := FPx^;
+  y := FPy^;
 
-  FPx^ := r * (FPx^ + cx*r2);
-  FPy^ := r * (FPy^ - cy*r2);
-  FPz^ := r * (FPz^ + cz*r2);
+  re := 1 + c1 * x + c2 * (sqr(x) - sqr(y));
+  im := c1 * y + c22 * x * y;
+
+  r := sqr(re) + sqr(im);
+  FPx^ := (x * re + y * im) / r;
+  FPy^ := (y * re - x * im) / r;
 end;
-
-///////////////////////////////////////////////////////////////////////////////
-procedure TVariationPostCurl.CalcCx;
-var
-  x, r, r2: double;
-begin
-  r2 := sqr(FPx^) + sqr(FPy^) + sqr(FPz^);
-
-  r := vvar / (cx2*r2 + c2x*FPx^ + 1);
-
-  FPx^ := r * (FPx^ + cx*r2);
-  FPy^ := r * FPy^;
-  FPz^ := r * FPz^;
-end;
-
-///////////////////////////////////////////////////////////////////////////////
-procedure TVariationPostCurl.CalcCy;
-var
-  r, r2: double;
-begin
-  r2 := sqr(FPx^) + sqr(FPy^) + sqr(FPz^);
-
-  r := vvar / (cy2*r2 - c2y*FPy^ + 1);
-
-  FPx^ := r * FPx^;
-  FPy^ := r * (FPy^ - cy*r2);
-  FPz^ := r * FPz^;
-end;
-
-///////////////////////////////////////////////////////////////////////////////
-procedure TVariationPostCurl.CalcCz;
-var
-  r, r2: double;
-begin
-  r2 := sqr(FPx^) + sqr(FPy^) + sqr(FPz^);
-
-  r := vvar / (cz2*r2 + c2z*FPz^ + 1);
-
-  FPx^ := r * FPx^;
-  FPy^ := r * FPy^;
-  FPz^ := r * (FPz^ + cz*r2);
-end;
-
-///////////////////////////////////////////////////////////////////////////////
-procedure TVariationPostCurl.CalcLinear;
-begin
-  FPx^ := vvar * FPx^;
-  FPy^ := vvar * FPy^;
-  FPz^ := vvar * FPz^;
-end;
-
 ///////////////////////////////////////////////////////////////////////////////
 class function TVariationPostCurl.GetInstance: TBaseVariation;
 begin
@@ -220,9 +96,8 @@ end;
 function TVariationPostCurl.GetVariableNameAt(const Index: integer): string;
 begin
   case Index of
-    0: Result := var_cx_name;
-    1: Result := var_cy_name;
-    2: Result := var_cz_name;
+    0: Result := 'post_curl_c1';
+    1: Result := 'post_curl_c2';
   else
     Result := '';
   end
@@ -232,16 +107,12 @@ end;
 function TVariationPostCurl.SetVariable(const Name: string; var value: double): boolean;
 begin
   Result := False;
-  if Name = var_cx_name then begin
-    cx := value;
+  if Name = 'post_curl_c1' then begin
+    c1 := value;
     Result := True;
   end
-  else if Name = var_cy_name then begin
-    cy := value;
-    Result := True;
-  end
-  else if Name = var_cz_name then begin
-    cz := value;
+  else if Name = 'post_curl_c2' then begin
+    c2 := value;
     Result := True;
   end;
 end;
@@ -249,16 +120,12 @@ end;
 function TVariationPostCurl.ResetVariable(const Name: string): boolean;
 begin
   Result := False;
-  if Name = var_cx_name then begin
-    cx := 0;
+  if Name = 'post_curl_c1' then begin
+    c1 := 0;
     Result := True;
   end
-  else if Name = var_cy_name then begin
-    cy := 0;
-    Result := True;
-  end
-  else if Name = var_cz_name then begin
-    cz := 0;
+  else if Name = 'post_curl_c2' then begin
+    c2 := 0;
     Result := True;
   end;
 end;
@@ -273,16 +140,12 @@ end;
 function TVariationPostCurl.GetVariable(const Name: string; var value: double): boolean;
 begin
   Result := False;
-  if Name = var_cx_name then begin
-    value := cx;
+  if Name = 'post_curl_c1' then begin
+    value := c1;
     Result := True;
   end
-  else if Name = var_cy_name then begin
-    value := cy;
-    Result := True;
-  end
-  else if Name = var_cz_name then begin
-    value := cz;
+  else if Name = 'post_curl_c2' then begin
+    value := c2;
     Result := True;
   end;
 end;

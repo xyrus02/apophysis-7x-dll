@@ -2,13 +2,17 @@ unit ParameterIO;
 
 interface
   uses Global, SysUtils, StrUtils, ControlPoint, XForm, cmap,
-       XFormMan, PerlRegEx, RegexHelper, Classes, Diagnostics;
+       XFormMan, RegularExpressionsCore, RegexHelper, Classes;
 
 function IsRegisteredVariation(name: string): boolean;
 function IsRegisteredVariable(name: string): boolean;
 
-procedure LoadPaletteFromXmlCompatible(xml: string; var cp: TControlPoint);
-procedure LoadXFormFromXmlCompatible(xml: string; isFinalXForm: boolean; var xf: TXForm; var enabled: boolean);
+procedure EnumParameters(xml: string; var list: TStringList); 
+function NameOf(xml: string): string;
+function FindFlameInBatch(xml, name: string): string;
+
+procedure LoadPaletteFromXmlCompatible(xml: Utf8String; var cp: TControlPoint);
+procedure LoadXFormFromXmlCompatible(xml: Utf8String; isFinalXForm: boolean; var xf: TXForm; var enabled: boolean);
 function LoadCpFromXmlCompatible(xml: string; var cp: TControlPoint; var statusOutput: string): boolean;
 function SaveCpToXmlCompatible(var xml: string; const cp1: TControlPoint): boolean;
 
@@ -48,6 +52,55 @@ begin
 end;
 
 (* ***************************** Loading functions ******************************* *)
+function NameOf(xml: string): string;
+var
+	Regex: TPerlRegEx;
+begin
+  Regex := TPerlRegEx.Create;
+  Regex.RegEx := '<flame.*?name="(.*?)".*?>.*?</flame>';
+  Regex.Options := [preSingleLine, preCaseless];
+  Regex.Subject := Utf8String(xml);
+  if Regex.Match then begin
+    Result := String(Regex.Groups[1]);
+  end else Result := '';
+  Regex.Free;
+end;
+procedure EnumParameters(xml: string; var list: TStringList);
+var
+	Regex: TPerlRegEx;
+begin
+  Regex := TPerlRegEx.Create;
+  Regex.RegEx := '<flame.*?>.*?</flame>';
+  Regex.Options := [preSingleLine, preCaseless];
+  Regex.Subject := Utf8String(xml);
+  if Regex.Match then begin
+  	repeat
+  		list.Add(String(Regex.MatchedText));
+  	until not Regex.MatchAgain;
+  end;
+  Regex.Free;
+end;
+function FindFlameInBatch(xml, name: string): string;
+var
+	Regex: TPerlRegEx;
+begin
+  Regex := TPerlRegEx.Create;
+  Regex.RegEx := '<flame.*?name="(.*?)".*?>.*?</flame>';
+  Regex.Options := [preSingleLine, preCaseless];
+  Regex.Subject := Utf8String(xml);
+  if Regex.Match then begin
+  	repeat
+      if (Utf8String(name) = Regex.Groups[1]) then begin
+        Result := String(Regex.MatchedText);
+        Regex.Free;
+        exit;
+      end;
+	  until not Regex.MatchAgain;
+  end;
+  Result := '';
+  Regex.Free;
+end;
+
 function LoadCpFromXmlCompatible(xml: string; var cp: TControlPoint; var statusOutput: string): boolean;
 const
   re_flame    : string = '<flame(.*?)>(.*?)</flame>';
@@ -56,17 +109,17 @@ const
   re_attrib   : string = '([0-9a-z_]+)="(.*?)"';
   re_strtoken : string = '([a-z0-9_]+)';
 var
-  flame_attribs   : string;
-  flame_content   : string;
-  xform_type      : string;
-  xform_attribs   : string;
-  palette_attribs : string;
-  palette_content : string;
+  flame_attribs   : Utf8String;
+  flame_content   : Utf8String;
+  xform_type      : Utf8String;
+  xform_attribs   : Utf8String;
+  palette_attribs : Utf8String;
+  palette_content : Utf8String;
 
   find_attribs : TPerlRegEx;
   found_attrib : boolean;
-  attrib_name  : string;
-  attrib_match : string;
+  attrib_name  : Utf8String;
+  attrib_match : Utf8String;
 
   find_xforms : TPerlRegEx;
   found_xform : boolean;
@@ -75,7 +128,7 @@ var
   find_strtokens : TPerlRegEx;
   found_strtoken : boolean;
   strtoken_index : integer;
-  strtoken_value : string;
+  strtoken_value : Utf8String;
 
   find_palette : TPerlRegEx;
 
@@ -85,134 +138,108 @@ var
 
   dummy: boolean;
   attrib_success: boolean;
+  i: integer;
 begin
-  find_strtokens := TPerlRegEx.Create(nil);
-  find_attribs := TPerlRegEx.Create(nil);
-  find_xforms := TPerlRegEx.Create(nil);
-  find_palette := TPerlRegEx.Create(nil);
+  find_strtokens := TPerlRegEx.Create;
+  find_attribs := TPerlRegEx.Create;
+  find_xforms := TPerlRegEx.Create;
+  find_palette := TPerlRegEx.Create;
 
-  find_attribs.RegEx := re_attrib;
-  find_strtokens.RegEx := re_strtoken;
-  find_xforms.RegEx := re_xform;
-  find_palette.RegEx := re_palette;
+  find_attribs.RegEx := Utf8String(re_attrib);
+  find_strtokens.RegEx := Utf8String(re_strtoken);
+  find_xforms.RegEx := Utf8String(re_xform);
+  find_palette.RegEx := Utf8String(re_palette);
 
   find_attribs.Options := [preSingleLine, preCaseless];
   find_strtokens.Options := [preSingleLine, preCaseless];
   find_xforms.Options := [preSingleLine, preCaseless];
   find_palette.Options := [preSingleLine, preCaseless];
 
-  flame_attribs := GetStringPart(xml, re_flame, 1, '');
-  flame_content := GetStringPart(xml, re_flame, 2, '');
+  flame_attribs := Utf8String(GetStringPart(xml, re_flame, 1, ''));
+  flame_content := Utf8String(GetStringPart(xml, re_flame, 2, ''));
 
-  find_attribs.Subject := flame_attribs;
+  find_attribs.Subject := Utf8String(flame_attribs);
   found_attrib := find_attribs.Match;
+
+  Result := true;
   
   while found_attrib do begin
-    attrib_match := find_attribs.MatchedExpression;
-    attrib_name := Lowercase(find_attribs.SubExpressions[1]);
+    attrib_match := find_attribs.MatchedText;
+    attrib_name := Utf8String(Lowercase(String(find_attribs.Groups[1])));
     attrib_success := true;
 
     if attrib_name = 'name' then
-      cp.name := GetStringPart(attrib_match, re_attrib, 2, '')
+      cp.name := GetStringPart(String(attrib_match), re_attrib, 2, '')
     else if attrib_name = 'vibrancy' then
-      cp.vibrancy := GetFloatPart(attrib_match, re_attrib, 2, defVibrancy)
+      cp.vibrancy := GetFloatPart(String(attrib_match), re_attrib, 2, defVibrancy)
     else if attrib_name = 'brightness' then
-      cp.brightness := GetFloatPart(attrib_match, re_attrib, 2, defBrightness)
+      cp.brightness := GetFloatPart(String(attrib_match), re_attrib, 2, defBrightness)
     else if attrib_name = 'gamma' then
-      cp.gamma := GetFloatPart(attrib_match, re_attrib, 2, defGamma)
+      cp.gamma := GetFloatPart(String(attrib_match), re_attrib, 2, defGamma)
     else if attrib_name = 'gamma_threshold' then
-      cp.gamma_threshold := GetFloatPart(attrib_match, re_attrib, 2, defGammaThreshold)
+      cp.gamma_threshold := GetFloatPart(String(attrib_match), re_attrib, 2, defGammaThreshold)
     else if attrib_name = 'oversample' then
-      cp.spatial_oversample := GetIntPart(attrib_match, re_attrib, 2, defOversample)
+      cp.spatial_oversample := GetIntPart(String(attrib_match), re_attrib, 2, defOversample)
     else if attrib_name = 'filter' then
-      cp.spatial_filter_radius := GetFloatPart(attrib_match, re_attrib, 2, defFilterRadius)
+      cp.spatial_filter_radius := GetFloatPart(String(attrib_match), re_attrib, 2, defFilterRadius)
     else if attrib_name = 'zoom' then
-      cp.zoom := GetFloatPart(attrib_match, re_attrib, 2, 0)
+      cp.zoom := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
     else if attrib_name = 'scale' then
-      cp.pixels_per_unit := GetFloatPart(attrib_match, re_attrib, 2, 25)
+      cp.pixels_per_unit := GetFloatPart(String(attrib_match), re_attrib, 2, 25)
     else if attrib_name = 'quality' then
-      cp.sample_density := GetFloatPart(attrib_match, re_attrib, 2, 5)
+      cp.sample_density := GetFloatPart(String(attrib_match), re_attrib, 2, 5)
     else if attrib_name = 'angle' then
-      cp.fangle := GetFloatPart(attrib_match, re_attrib, 2, 0)
+      cp.fangle := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
     else if attrib_name = 'rotate' then // angle = -pi*x/180
-      cp.vibrancy := -PI * GetFloatPart(attrib_match, re_attrib, 2, 0) / 180
+      cp.fangle := -PI * GetFloatPart(String(attrib_match), re_attrib, 2, 0) / 180
     else if attrib_name = 'cam_pitch' then
-      cp.cameraPitch := GetFloatPart(attrib_match, re_attrib, 2, 0)
+      cp.cameraPitch := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
     else if attrib_name = 'cam_yaw' then
-      cp.cameraYaw := GetFloatPart(attrib_match, re_attrib, 2, 0)
+      cp.cameraYaw := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
     else if attrib_name = 'cam_perspective' then
-      cp.cameraPersp := GetFloatPart(attrib_match, re_attrib, 2, 1)
+      cp.cameraPersp := GetFloatPart(String(attrib_match), re_attrib, 2, 1)
     else if attrib_name = 'cam_dist' then  // perspective = 1/x
       begin
-        cp.cameraPersp := GetFloatPart(attrib_match, re_attrib, 2, 1);
+        cp.cameraPersp := GetFloatPart(String(attrib_match), re_attrib, 2, 1);
         if cp.cameraPersp = 0 then
           cp.cameraPersp := EPS;
         cp.cameraPersp := 1 / cp.cameraPersp;
       end
     else if attrib_name = 'cam_zpos' then
-      cp.cameraZpos := GetFloatPart(attrib_match, re_attrib, 2, 0)
+      cp.cameraZpos := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
     else if attrib_name = 'cam_dof' then
-      cp.cameraDOF := GetFloatPart(attrib_match, re_attrib, 2, 0)
+      cp.cameraDOF := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
 
     else if attrib_name = 'estimator_radius' then
-      cp.estimator := GetFloatPart(attrib_match, re_attrib, 2, 0)
+      cp.estimator := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
     else if attrib_name = 'estimator_minimum' then
-      cp.estimator_min := GetFloatPart(attrib_match, re_attrib, 2, 0)
+      cp.estimator_min := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
     else if attrib_name = 'estimator_curve' then
-      cp.estimator_curve := GetFloatPart(attrib_match, re_attrib, 2, 0)
+      cp.estimator_curve := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
     else if attrib_name = 'enable_de' then
-      cp.enable_de := GetBoolPart(attrib_match, re_attrib, 2, false)
+      cp.enable_de := GetBoolPart(String(attrib_match), re_attrib, 2, false)
 
     else if attrib_name = 'center' then
       begin
-        temp2f := Get2FloatPart(attrib_match, re_attrib, 2, 0);
+        temp2f := Get2FloatPart(String(attrib_match), re_attrib, 2, 0);
         cp.center[0] := temp2f.f1; cp.center[1] := temp2f.f2;
       end
     else if attrib_name = 'size' then
       begin
-        temp2i := Get2IntPart(attrib_match, re_attrib, 2, 0);
+        temp2i := Get2IntPart(String(attrib_match), re_attrib, 2, 0);
         cp.Width := temp2i.i1; cp.Height := temp2i.i2;
       end
     else if attrib_name = 'background' then
       begin
-        temprgb := GetRGBPart(attrib_match, re_attrib, 2, 0);
+        temprgb := GetRGBPart(String(attrib_match), re_attrib, 2, 0);
         cp.background[0] := temprgb.r;
         cp.background[1] := temprgb.g;
         cp.background[2] := temprgb.b;
-        LogWrite('INFO|Read background property: [' +
-          IntToStr(cp.background[0]) + ' ' +
-          IntToStr(cp.background[1]) + ' ' +
-          IntToStr(cp.background[2]) + ']', 'parser.log');
       end
 
     else if attrib_name = 'soloxform' then
-      cp.soloXform := GetIntPart(attrib_match, re_attrib, 2, 0)
-    else if attrib_name = 'version' then
-      begin
-      end
-    else if attrib_name = 'plugins' then
-      begin
-        (*cp.used_plugins.Clear;
-        find_strtokens.Subject := GetStringPart(attrib_match, re_attrib, 2, '');
-        found_strtoken := find_strtokens.Match;
-        strtoken_index := 0;
-        while found_strtoken do begin
-          strtoken_value := find_strtokens.MatchedExpression;
-          cp.used_plugins.Add(strtoken_value);
-          Inc(strtoken_index);
-          found_strtoken := find_strtokens.MatchAgain;
-        end; *)
-      end
-    else
-      begin
-        LogWrite('WARNING|' +'Unable to make sense of attribute "flame.' + attrib_name + '"', 'parser.log');
-        attrib_success := false;
-      end;
+      cp.soloXform := GetIntPart(String(attrib_match), re_attrib, 2, 0);
 
-      if attrib_success then
-        LogWrite('INFO|' +'Sucessfully interpreted attribute "flame.' + attrib_name + '" ("' +
-          GetStringPart(attrib_match, re_attrib, 2, '') + '")', 'parser.log');
-    
     found_attrib := find_attribs.MatchAgain;
   end;
 
@@ -225,16 +252,19 @@ begin
   xform_index := 0;
   cp.finalXformEnabled := false;
 
+  for i := 0 TO NXFORMS - 1 do
+    cp.xform[i].density := 0;
+
   while found_xform do begin
-    xform_type := find_xforms.SubExpressions[1];
-    xform_attribs := find_xforms.SubExpressions[2];
-    if (LowerCase(xform_type) = 'xform') then begin
-      LoadXFormFromXmlCompatible(find_xforms.MatchedExpression,
+    xform_type := find_xforms.Groups[1];
+    xform_attribs := find_xforms.Groups[2];
+    if (LowerCase(String(xform_type)) = 'xform') then begin
+      LoadXFormFromXmlCompatible(find_xforms.MatchedText,
         false, cp.xform[xform_index], cp.finalXformEnabled);
       xform_index := xform_index + 1;
     end else begin
       cp.finalXform := Txform.Create;
-      LoadXFormFromXmlCompatible(find_xforms.MatchedExpression,
+      LoadXFormFromXmlCompatible(find_xforms.MatchedText,
         true, cp.finalXform, dummy);
       cp.finalXformEnabled := true;
       cp.useFinalXform := true;
@@ -244,16 +274,16 @@ begin
     found_xform := find_xforms.MatchAgain;
   end;
 
-  find_palette.Subject := xml;
+  find_palette.Subject := Utf8String(xml);
   if (find_palette.Match) then
-    LoadPaletteFromXmlCompatible(find_palette.MatchedExpression, cp);
+    LoadPaletteFromXmlCompatible(find_palette.MatchedText, cp);
 
   find_strtokens.Free;
   find_attribs.Free;
   find_xforms.Free;
   find_palette.Free;
 end;
-procedure LoadPaletteFromXmlCompatible(xml: string; var cp: TControlPoint);
+procedure LoadPaletteFromXmlCompatible(xml: Utf8String; var cp: TControlPoint);
 const
   re_palette: string = '<palette(.*?)>([a-f0-9\s]+)</palette>';
   re_attrib : string = '([0-9a-z_]+)="(.*?)"';
@@ -264,8 +294,8 @@ var
 
   find_attribs : TPerlRegEx;
   found_attrib : boolean;
-  attrib_name  : string;
-  attrib_match : string;
+  attrib_name  : Utf8String;
+  attrib_match : Utf8String;
   attrib_success : Boolean;
 function HexChar(c: Char): Byte;
   begin
@@ -278,30 +308,26 @@ function HexChar(c: Char): Byte;
     end;
   end;
 begin
-  hexdata := GetStringPart(xml, re_palette, 2, '');
-  attr := GetStringPart(xml, re_palette, 1, '');
+  hexdata := GetStringPart(String(xml), re_palette, 2, '');
+  attr := GetStringPart(String(xml), re_palette, 1, '');
 
-  find_attribs := TPerlRegEx.Create(nil);
-  find_attribs.RegEx := re_attrib;
+  find_attribs := TPerlRegEx.Create;
+  find_attribs.RegEx := Utf8String(re_attrib);
   find_attribs.Options := [preSingleLine, preCaseless];
-  find_attribs.Subject := attr;
+  find_attribs.Subject := Utf8String(attr);
   found_attrib := find_attribs.Match;
+
+  count := 0;
   
   while found_attrib do begin
-    attrib_match := find_attribs.MatchedExpression;
-    attrib_name := Lowercase(find_attribs.SubExpressions[1]);
+    attrib_match := find_attribs.MatchedText;
+    attrib_name := Utf8String(Lowercase(String(find_attribs.Groups[1])));
     attrib_success := true;
 
     if (attrib_name = 'count') then
-      count := GetIntPart(attrib_match, re_attrib, 2, 256)
+      count := GetIntPart(String(attrib_match), re_attrib, 2, 256)
     else if (attrib_name = 'format') then
-      format := GetStringPart(attrib_match, re_attrib, 2, 'RGB')
-    else attrib_success := false;
-
-    if (attrib_success) then
-      LogWrite('INFO|' +'Sucessfully interpreted attribute "palette.' + attrib_name + '"', 'parser.log')
-    else
-      LogWrite('WARNING|' +'Unable to make sense of attribute "palette.' + attrib_name + '"', 'parser.log');
+      format := GetStringPart(String(attrib_match), re_attrib, 2, 'RGB');
 
     found_attrib := find_attribs.MatchAgain;
   end;
@@ -314,7 +340,7 @@ begin
   for i := 1 to Length(hexdata) do
   begin
     c := hexdata[i];
-    if c in ['0'..'9']+['A'..'F']+['a'..'f'] then data := data + c;
+    if CharInSet(c, ['0'..'9']+['A'..'F']+['a'..'f']) then data := data + c;
   end;
 
   if alpha then len := count * 8
@@ -328,7 +354,7 @@ begin
     cp.cmap[i][2] := 16 * HexChar(Data[pos + 5]) + HexChar(Data[pos + 6]);
   end;
 end;
-procedure LoadXFormFromXmlCompatible(xml: string; isFinalXForm: boolean; var xf: TXForm; var enabled: boolean);
+procedure LoadXFormFromXmlCompatible(xml: Utf8String; isFinalXForm: boolean; var xf: TXForm; var enabled: boolean);
 const
   re_attrib : string = '([0-9a-z_]+)="(.*?)"';
   re_xform  : string = '<((?:final)?xform)(.*?)/>';
@@ -337,8 +363,8 @@ var
   xform_attribs: string;
   find_attribs : TPerlRegEx;
   found_attrib : boolean;
-  attrib_name  : string;
-  attrib_match : string;
+  attrib_name  : Utf8String;
+  attrib_match : Utf8String;
   token_part   : string;
   i, j         : integer;
   d            : double;
@@ -347,33 +373,33 @@ var
   attrib_success: Boolean;
 begin
   enabled := true;
-  xform_attribs := GetStringPart(xml, re_xform, 2, '');
+  xform_attribs := GetStringPart(String(xml), re_xform, 2, '');
 
-  find_attribs := TPerlRegEx.Create(nil);
-  find_attribs.RegEx := re_attrib;
+  find_attribs := TPerlRegEx.Create;
+  find_attribs.RegEx := Utf8String(re_attrib);
   find_attribs.Options := [preSingleLine, preCaseless];
-  find_attribs.Subject := xform_attribs;
+  find_attribs.Subject := Utf8String(xform_attribs);
   found_attrib := find_attribs.Match;
 
   for i := 0 to NRVAR-1 do
     xf.SetVariation(i, 0);
   
   while found_attrib do begin
-    attrib_match := find_attribs.MatchedExpression;
-    attrib_name := (find_attribs.SubExpressions[1]);
+    attrib_match := find_attribs.MatchedText;
+    attrib_name := (find_attribs.Groups[1]);
     attrib_success := true;
 
     if (attrib_name = 'enabled') and isFinalXform then
-      enabled := GetBoolPart(attrib_match, re_attrib, 2, true)
+      enabled := GetBoolPart(String(attrib_match), re_attrib, 2, true)
     else if (attrib_name = 'weight') and (not isFinalXform) then
-      xf.density := GetFloatPart(attrib_match, re_attrib, 2, 0.5)
+      xf.density := GetFloatPart(String(attrib_match), re_attrib, 2, 0.5)
     else if (attrib_name = 'symmetry') and (not isFinalXform) then
-      xf.symmetry := GetFloatPart(attrib_match, re_attrib, 2, 0)
+      xf.symmetry := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
     else if (attrib_name = 'color_speed') and (not isFinalXform) then
-      xf.symmetry := GetFloatPart(attrib_match, re_attrib, 2, 0)
+      xf.symmetry := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
     else if (attrib_name = 'chaos') and (not isFinalXform) then
       begin
-        token_part := GetStringPart(attrib_match, re_attrib, 2, '');
+        token_part := GetStringPart(String(attrib_match), re_attrib, 2, '');
         if token_part <> '' then
           begin
             t := TStringList.Create;
@@ -384,14 +410,14 @@ begin
           end;
       end
     else if (attrib_name = 'opacity') and (not isFinalXform) then
-      xf.transOpacity := GetFloatPart(attrib_match, re_attrib, 2, 1)
+      xf.transOpacity := GetFloatPart(String(attrib_match), re_attrib, 2, 1)
     else if (attrib_name = 'name') and (not isFinalXform) then
-      xf.TransformName := GetStringPart(attrib_match, re_attrib, 2, '')
+      xf.TransformName := GetStringPart(String(attrib_match), re_attrib, 2, '')
     else if (attrib_name = 'plotmode') and (not isFinalXform) then
-      xf.transOpacity := StrToFloat(IfThen(LowerCase(GetStringPart(attrib_match, re_attrib, 2, '')) = 'off', '0', '1'))
+      xf.transOpacity := StrToFloat(IfThen(LowerCase(GetStringPart(String(attrib_match), re_attrib, 2, '')) = 'off', '0', '1'))
     else if (attrib_name = 'coefs') then
       begin
-        token_part := GetStringPart(attrib_match, re_attrib, 2, '1 0 0 1 0 0');
+        token_part := GetStringPart(String(attrib_match), re_attrib, 2, '1 0 0 1 0 0');
         xf.c[0][0] := GetFloatPart(token_part, re_coefs, 1, 1);
         xf.c[0][1] := GetFloatPart(token_part, re_coefs, 2, 0);
         xf.c[1][0] := GetFloatPart(token_part, re_coefs, 3, 0);
@@ -401,7 +427,7 @@ begin
       end
     else if (attrib_name = 'post') then
       begin
-        token_part := GetStringPart(attrib_match, re_attrib, 2, '1 0 0 1 0 0');
+        token_part := GetStringPart(String(attrib_match), re_attrib, 2, '1 0 0 1 0 0');
         xf.p[0][0] := GetFloatPart(token_part, re_coefs, 1, 1);
         xf.p[0][1] := GetFloatPart(token_part, re_coefs, 2, 0);
         xf.p[1][0] := GetFloatPart(token_part, re_coefs, 3, 0);
@@ -410,49 +436,39 @@ begin
         xf.p[2][1] := GetFloatPart(token_part, re_coefs, 6, 0);
       end
     else if (attrib_name = 'color') then
-      xf.color := GetFloatPart(attrib_match, re_attrib, 2, 0)
+      xf.color := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
     else if (attrib_name = 'var_color') then
-      xf.vc := GetFloatPart(attrib_match, re_attrib, 2, 1)
-    else if ((attrib_name = 'symmetry') or (attrib_name = 'weight') or
-             (attrib_name = 'color_speed') or (attrib_name = 'chaos') or
-             (attrib_name = 'opacity') or (attrib_name = 'name') or
-             (attrib_name = 'plotmode')) and (isFinalXForm) then
+      xf.vc := GetFloatPart(String(attrib_match), re_attrib, 2, 1)
+    else if ((String(attrib_name) = 'symmetry') or (String(attrib_name) = 'weight') or
+             (String(attrib_name) = 'color_speed') or (String(attrib_name) = 'chaos') or
+             (String(attrib_name) = 'opacity') or (String(attrib_name) = 'name') or
+             (String(attrib_name) = 'plotmode')) and (isFinalXForm) then
       begin
         //EmitWarning('Malformed attribute "xform.' + attrib_name + '" - ignoring');
         //LogWrite('WARNING|' +'Malformed attribute "xform.' + attrib_name + '" - ignoring', 'parser.log');
         attrib_success := false;
       end
     else begin
-      if (attrib_name = 'linear3D') then begin
-        xf.SetVariation(0, GetFloatPart(attrib_match, re_attrib, 2, 0));
-      end else if (IsRegisteredVariation(attrib_name)) then begin
+      if (String(attrib_name) = 'linear3D') then begin
+        xf.SetVariation(0, GetFloatPart(String(attrib_match), re_attrib, 2, 0));
+      end else if (IsRegisteredVariation(String(attrib_name))) then begin
         for i := 0 to NRVAR - 1 do begin
-          if lowercase(varnames(i)) = lowercase(attrib_name) then begin
-            xf.SetVariation(i, GetFloatPart(attrib_match, re_attrib, 2, 0));
+          if lowercase(varnames(i)) = lowercase(String(attrib_name)) then begin
+            xf.SetVariation(i, GetFloatPart(String(attrib_match), re_attrib, 2, 0));
             v_set := true;
             break;
           end;
         end;
-        if v_set then LogWrite('INFO|' +'Sucessfully interpreted attribute "xform.' + attrib_name + '" as a variation', 'parser.log')
-        else if (IsRegisteredVariable(attrib_name)) then begin
-          d := GetFloatPart(attrib_match, re_attrib, 2, 0);
-          xf.SetVariable(attrib_name, d);
-          LogWrite('INFO|' +'Sucessfully interpreted attribute "xform.' + attrib_name + '" as a variable', 'parser.log');
-        end else begin
-          LogWrite('WARNING|' +'Unable to make sense of attribute "xform.' + attrib_name + '"', 'parser.log');
+        if (IsRegisteredVariable(String(attrib_name))) then begin
+          d := GetFloatPart(String(attrib_match), re_attrib, 2, 0);
+          xf.SetVariable(String(attrib_name), d);
         end;
-      end else if (IsRegisteredVariable(attrib_name)) then begin
-        d := GetFloatPart(attrib_match, re_attrib, 2, 0);
-        xf.SetVariable(attrib_name, d);
-        LogWrite('INFO|' +'Sucessfully interpreted attribute "xform.' + attrib_name + '" as a variable', 'parser.log');
-      end else begin
-        LogWrite('WARNING|' +'Unable to make sense of attribute "xform.' + attrib_name + '"', 'parser.log');
+      end else if (IsRegisteredVariable(String(attrib_name))) then begin
+        d := GetFloatPart(String(attrib_match), re_attrib, 2, 0);
+        xf.SetVariable(String(attrib_name), d);
       end;
       attrib_success := false;
     end;
-
-    if (attrib_success) then
-      LogWrite('INFO|' +'Sucessfully interpreted attribute "xform.' + attrib_name + '"', 'parser.log');
 
     found_attrib := find_attribs.MatchAgain;
   end;
@@ -564,7 +580,7 @@ begin
     t := cp1.NumXForms;
     for i := 0 to t - 1 do
       FileList.Add(cp1.xform[i].ToXMLString);
-    if cp1.HasFinalXForm then
+    if cp1.HasFinalXForm and cp1.finalXformEnabled then
     begin
       // 'enabled' flag disabled in this release
       FileList.Add(cp1.xform[t].FinalToXMLString(cp1.finalXformEnabled));

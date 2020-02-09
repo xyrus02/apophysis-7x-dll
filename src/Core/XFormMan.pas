@@ -292,6 +292,8 @@ var
   i: integer;
   prevNumVariables:integer;
 begin
+  OutputDebugString(PChar(Variation.GetName));
+
   VariationList.Add(Variation);
   Variation.Supports3D := supports3D;
   Variation.SupportsDC := supportsDC;

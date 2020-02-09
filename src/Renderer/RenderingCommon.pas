@@ -26,18 +26,45 @@ interface
 type
   TOnFinish = procedure of object;
   TOnProgress = procedure(prog: double) of object;
+
+  {$ifdef Apo7X64}
   TBucket = Record
     Red,
     Green,
     Blue,
-    Count: Double;//Longword;
+    Count: Double;
   end;
+  {$else}
+  TBucket = Record
+    Red,
+    Green,
+    Blue,
+    Count: Single;
+  end;
+  {$endif}
   PBucket = ^TBucket;
   TBucketArray = array of array of TBucket;
+  TZBuffer = array of array of double;
 
   TBucketStats = record
     MaxR, MaxG, MaxB, MaxA,
     TotalA: double;
   end;
+  
+procedure TrimWorkingSet;
+
 implementation
+uses Windows;
+
+procedure TrimWorkingSet;
+var
+  hProcess: THandle;
+begin
+  hProcess := OpenProcess(PROCESS_SET_QUOTA, false, GetCurrentProcessId);
+  
+  try SetProcessWorkingSetSize(hProcess, $FFFFFFFF, $FFFFFFFF);
+  finally CloseHandle(hProcess);
+  end;
+end;
+
 end.

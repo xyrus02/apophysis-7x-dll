@@ -30,6 +30,10 @@ unit XForm;
 interface
 
 uses
+{$ifdef Apo7X64}
+{$else}
+AsmRandom,
+{$endif}
   XFormMan, BaseVariation;
 
 const
@@ -46,7 +50,7 @@ const
 
 type
   TCPpoint = record
-    x, y, z, c: double;
+    x, y, z, c, o: double;
   end;
   PCPpoint = ^TCPpoint;
 
@@ -61,7 +65,10 @@ type
 
   TMatrix = array[0..2, 0..2] of double;
 
-{$define _ASM_}
+{$ifdef Apo7X64}
+{$else}
+  //{$define _ASM_}
+{$endif}
 
 type
   TXForm = class
@@ -218,7 +225,7 @@ type
 implementation
 
 uses
-  SysUtils, Math, StrUtils, AsmRandom;
+  SysUtils, Math, StrUtils;
 
 const
   EPS: double = 1E-300;
@@ -241,14 +248,6 @@ begin
   vars[index] := value;
 end;
 
-procedure SinCos(const Theta: double; var Sin, Cos: double); // to avoid using 'extended' type
-asm
-    FLD     Theta
-    FSINCOS
-    FSTP    qword ptr [edx]    // Cos
-    FSTP    qword ptr [eax]    // Sin
-    FWAIT
-end;
 
 { TXForm }
 
@@ -879,159 +878,55 @@ end;
 
 ///////////////////////////////////////////////////////////////////////////////
 procedure TXForm.Noise;
-{$ifndef _ASM_}
 var
-  r, sinr, cosr: double;
+  r, s, sinr, cosr: double;
 begin
-  SinCos(random * 2*pi, sinr, cosr);
-  r := vars[14] * random;
+  // Randomize here = HACK! Fix me...
+  Randomize; SinCos(random * 2*pi, sinr, cosr);
+  s := vars[14];
+  r := s * random;
   FPx := FPx + FTx * r * cosr;
   FPy := FPy + FTy * r * sinr;
-  FPz := FPz + FTz * vars[14];
-{$else}
-asm
-    mov     edx, [ebx + vars]
-    fld     qword ptr [edx + 14*8]
-    fld     qword ptr [eax + FTz]
-    fmul    st, st(1)
-    fadd    qword ptr [eax + FPz]
-    fstp    qword ptr [eax + FPz]
-    call    AsmRandExt
-    fmulp
-    call    AsmRandExt
-    fadd    st, st
-    fldpi
-    fmulp
-    fsincos
-    fmul    st, st(2)
-    fmul    qword ptr [ebx + FTx]
-    fadd    qword ptr [ebx + FPx]
-    fstp    qword ptr [ebx + FPx]
-    fmulp
-    fmul    qword ptr [ebx + FTy]
-    fadd    qword ptr [ebx + FPy]
-    fstp    qword ptr [ebx + FPy]
-    fwait  
-{$endif}
+  FPz := FPz + FTz * s;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
 procedure TXForm.Blur;
-{$ifndef _ASM_}
 var
-  r, sina, cosa: double;
+  r, s, z, sina, cosa: double;
 begin
-  SinCos(random * 2*pi, sina, cosa);
-  r := vars[15] * random;
+  // Randomize here = HACK! Fix me...
+  Randomize; SinCos(random * 2*pi, sina, cosa);
+  s := vars[15]; z := FTz;
+  r := s * random;
   FPx := FPx + r * cosa;
   FPy := FPy + r * sina;
-  FPz := FPz + FTz * vars[15];
-{$else}
-asm
-    mov     edx, [ebx + vars]
-    fld     qword ptr [edx + 15*8]
-    fld     qword ptr [eax + FTz]
-    fmul    st, st(1)
-    fadd    qword ptr [eax + FPz]
-    fstp    qword ptr [eax + FPz]
-    call    AsmRandExt
-    fmulp
-    call    AsmRandExt
-    fadd    st, st
-    fldpi
-    fmulp
-    fsincos
-    fmul    st, st(2)
-    fadd    qword ptr [ebx + FPx]
-    fstp    qword ptr [ebx + FPx]
-    fmulp
-    fadd    qword ptr [ebx + FPy]
-    fstp    qword ptr [ebx + FPy]
-    fwait 
-{$endif}
+  FPz := FPz + s * z;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
 procedure TXForm.Gaussian;
-{$ifndef _ASM_}
 var
-  r, sina, cosa: double;
+  r, s, z, sina, cosa: double;
 begin
-  SinCos(random * 2*pi, sina, cosa);
-  r := vars[16] * (gauss_rnd[0] + gauss_rnd[1] + gauss_rnd[2] + gauss_rnd[3] - 2);
+  // Randomize here = HACK! Fix me...
+  Randomize; SinCos(random * 2*pi, sina, cosa);
+  s := vars[16]; z := FTz;
+  r := s * (gauss_rnd[0] + gauss_rnd[1] + gauss_rnd[2] + gauss_rnd[3] - 2);
   gauss_rnd[gauss_N] := random;
   gauss_N := (gauss_N+1) and $3;
 
   FPx := FPx + r * cosa;
   FPy := FPy + r * sina;
-  FPz := FPz + vars[16] * FTz;
-{$else}
-asm
-    fld     qword ptr [ebx + gauss_rnd]
-    fadd    qword ptr [ebx + gauss_rnd+8]
-    fadd    qword ptr [ebx + gauss_rnd+16]
-    fadd    qword ptr [ebx + gauss_rnd+24]
-    fld1
-    fadd    st,st
-    fsubp   st(1),st
-    mov     edx, [ebx + vars]
-    fld     qword ptr [edx + 16*8]
-    fld     qword ptr [eax + FTz]
-    fmul    st, st(1)
-    fadd    qword ptr [eax + FPz]
-    fstp    qword ptr [eax + FPz]
-    fstp    st
-    fmul    qword ptr [edx + 16*8]
-    call    AsmRandExt
-    mov     edx, [ebx + gauss_N]
-    fst     qword ptr [ebx + gauss_rnd + edx*8]
-    inc     edx
-    and     edx,$03
-    mov     [eax + gauss_N], edx
-
-    fadd    st, st
-    fldpi
-    fmulp
-    fsincos
-    fmul    st, st(2)
-    fadd    qword ptr [ebx + FPx]
-    fstp    qword ptr [ebx + FPx]
-    fmulp
-    fadd    qword ptr [ebx + FPy]
-    fstp    qword ptr [ebx + FPy]
-    fwait             
-{$endif}
+  FPz := FPz + s * z;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
 procedure TXForm.ZBlur;
-{$ifndef _ASM_}
 begin
   FPz := FPz + vars[17] * (gauss_rnd[0] + gauss_rnd[1] + gauss_rnd[2] + gauss_rnd[3] - 2);
   gauss_rnd[gauss_N] := random;
   gauss_N := (gauss_N+1) and $3;
-{$else}
-asm
-    fld     qword ptr [ebx + gauss_rnd]
-    fadd    qword ptr [ebx + gauss_rnd+8]
-    fadd    qword ptr [ebx + gauss_rnd+16]
-    fadd    qword ptr [ebx + gauss_rnd+24]
-    fld1
-    fadd    st,st
-    fsubp   st(1),st
-    mov     edx, [ebx + vars]
-    fmul    qword ptr [edx + 17*8]
-    call    AsmRandExt
-    mov     edx, [ebx + gauss_N]
-    fstp    qword ptr [ebx + gauss_rnd + edx*8]
-    inc     edx
-    and     edx,$03
-    mov     [eax + gauss_N], edx
-
-    fadd    qword ptr [ebx + FPz]
-    fstp    qword ptr [ebx + FPz]
-    fwait
-{$endif}
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1039,7 +934,8 @@ procedure TXForm.Blur3D;
 var
   r, sina, cosa, sinb, cosb: double;
 begin
-  SinCos(random * 2*pi, sina, cosa);
+  // Randomize here = HACK! Fix me...
+  Randomize; SinCos(random * 2*pi, sina, cosa);
   r := vars[18] * (gauss_rnd[0] + gauss_rnd[1] + gauss_rnd[2] + gauss_rnd[3] - 2);
   gauss_rnd[gauss_N] := random;
   gauss_N := (gauss_N+1) and $3;
@@ -1052,47 +948,17 @@ end;
 
 ///////////////////////////////////////////////////////////////////////////////
 procedure TXForm.PreBlur;
-{$ifndef _ASM_}
 var
   r, sina, cosa: double;
 begin
-  SinCos(random * 2*pi, sina, cosa);
+  // Randomize here = HACK! Fix me...
+  Randomize; SinCos(random * 2*pi, sina, cosa);
   r := vars[19] * (gauss_rnd[0] + gauss_rnd[1] + gauss_rnd[2] + gauss_rnd[3] - 2);
   gauss_rnd[gauss_N] := random;
   gauss_N := (gauss_N+1) and $3;
 
   FTx := FTx + r * cosa;
   FTy := FTy + r * sina;
-{$else}
-asm
-    fld     qword ptr [ebx + gauss_rnd]
-    fadd    qword ptr [ebx + gauss_rnd+8]
-    fadd    qword ptr [ebx + gauss_rnd+16]
-    fadd    qword ptr [ebx + gauss_rnd+24]
-    fld1
-    fadd    st,st
-    fsubp   st(1),st
-    mov     edx, [ebx + vars]
-    fmul    qword ptr [edx + 19*8]
-    call    AsmRandExt
-    mov     edx, [ebx + gauss_N]
-    fst     qword ptr [ebx + gauss_rnd + edx*8]
-    inc     edx
-    and     edx,$03
-    mov     [eax + gauss_N], edx
-
-    fadd    st, st
-    fldpi
-    fmulp
-    fsincos
-    fmul    st, st(2)
-    fadd    qword ptr [ebx + FTx]
-    fstp    qword ptr [ebx + FTx]
-    fmulp
-    fadd    qword ptr [ebx + FTy]
-    fstp    qword ptr [ebx + FTy]
-    fwait
-{$endif}
 end;
 
 

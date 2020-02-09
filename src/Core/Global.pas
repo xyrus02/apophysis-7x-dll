@@ -58,12 +58,17 @@ function OpenSaveFileDialog(Parent: TWinControl;
                             NoChangeDir,
                             DoOpen: Boolean): Boolean;
 procedure LoadThumbnailPlaceholder(ThumbnailSize : integer);
+function GetEnvVarValue(const VarName: string): string;
 
 
 const
-  APP_NAME: string = 'Apophysis 7x Rendering Core Library';
-  APP_VERSION: string = 'Version 16';
-  APP_BUILD: string = '';
+  APP_NAME: string = 'Apophysis 7x';
+  APP_VERSION: string = 'Version 15C';
+  {$ifdef Apo7X64}
+  APP_BUILD: string = ' - 64 bit';
+  {$else}
+  APP_BUILD: string = ' - 32 bit';
+  {$endif}
   MAX_TRANSFORMS: integer = 100;
   prefilter_white: integer = 1024;
   eps: double = 1E-10;
@@ -78,6 +83,14 @@ const
   crEditMove   = 21;
   crEditRotate = 22;
   crEditScale  = 23;
+
+const
+  SingleBuffer : boolean =
+  {$ifdef Apo7X64}
+    false
+  {$else}
+    true
+  {$endif};
   
 var
   MainSeed: integer;
@@ -100,6 +113,7 @@ var
   EmbedThumbnails : boolean;
   LanguageFile : string;
   AvailableLanguages : TStringList;
+  PluginPath : string;
 
   { UPR Options }
 
@@ -225,6 +239,7 @@ var
   defLibrary: string;
   LimitVibrancy: Boolean;
   DefaultPalette: TColorMap;
+
   ChaoticaPath, ChaoticaPath64: string;
   UseX64IfPossible: boolean;
 
@@ -241,6 +256,25 @@ var
 function Round6(x: double): double;
 
 implementation
+
+function GetEnvVarValue(const VarName: string): string;
+var
+  BufSize: Integer;  // buffer size required for value
+begin
+  // Get required buffer size (inc. terminal #0)
+  BufSize := GetEnvironmentVariable(
+    PChar(VarName), nil, 0);
+  if BufSize > 0 then
+  begin
+    // Read env var value into result string
+    SetLength(Result, BufSize - 1);
+    GetEnvironmentVariable(PChar(VarName),
+      PChar(Result), BufSize);
+  end
+  else
+    // No such environment variable
+    Result := '';
+end;
 
 procedure LoadThumbnailPlaceholder(ThumbnailSize : integer);
 var
@@ -436,15 +470,6 @@ begin
     end;
   end;
   Result := str;
-end;
-
-procedure SinCos(const Theta: double; var Sin, Cos: double); // to avoid using 'extended' type
-asm
-    FLD     Theta
-    FSINCOS
-    FSTP    qword ptr [edx]    // Cos
-    FSTP    qword ptr [eax]    // Sin
-    FWAIT
 end;
 
 (*

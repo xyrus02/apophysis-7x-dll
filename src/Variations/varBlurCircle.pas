@@ -54,15 +54,6 @@ implementation
 uses
   Math;
 
-procedure SinCosA(const Theta: double; var Sin, Cos: double); // to avoid using 'extended' type
-asm
-    FLD     Theta
-    FSINCOS
-    FSTP    qword ptr [edx]    // Cos
-    FSTP    qword ptr [eax]    // Sin
-    FWAIT
-end;
-
 ///////////////////////////////////////////////////////////////////////////////
 procedure TVariationBlurCircle.Prepare;
 begin
@@ -95,7 +86,7 @@ begin
   end;
 
   r := VVAR * side;
-  SinCosA(PI_4 * perimeter / side - PI_4, sina, cosa);
+  SinCos(PI_4 * perimeter / side - PI_4, sina, cosa);
 
   FPx^ := FPx^ + r * cosa;
   FPy^ := FPy^ + r * sina;

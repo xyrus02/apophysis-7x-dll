@@ -26,13 +26,16 @@ unit varRadialBlur;
 interface
 
 uses
-  BaseVariation, XFormMan, AsmRandom;
+  BaseVariation, XFormMan;
 
 const
   var_name = 'radial_blur';
   var_a_name = 'radial_blur_angle';
 
-{$define _ASM_}
+{$ifdef Apo7X64}
+{$else}
+  {$define _ASM_}
+{$endif}
 
 type
   TVariationRadialBlur = class(TBaseVariation)

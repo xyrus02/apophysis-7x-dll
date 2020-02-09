@@ -4,36 +4,39 @@
 library aporender;
 
 uses
-  SysUtils,
-  Classes,
-  Windows,
-  Graphics,
   Forms,
-  Math,
+  Dialogs,
+  SysUtils,
+  Graphics,
+  Windows,
+  {$ifdef Apo7X64}
+  // if on x64, we don't use assembler
+  {$else}
   AsmRandom in 'System\AsmRandom.pas',
-  GradientHlpr in 'ColorMap\GradientHlpr.pas',
-  cmap in 'ColorMap\cmap.pas',
-  cmapdata in 'ColorMap\cmapdata.pas',
-  XFormMan in 'Core\XFormMan.pas',
-  BaseVariation in 'Core\BaseVariation.pas',
-  Global in 'Core\Global.pas',
-  NativeXml in 'System\NativeXml.pas',
-  NativeXmlAppend in 'System\NativeXmlAppend.pas',
-  NativeXmlObjectStorage in 'System\NativeXmlObjectStorage.pas',
-  RegexHelper in 'System\RegexHelper.pas',
-  Translation in 'Core\Translation.pas',
-  XForm in 'Flame\XForm.pas',
-  ControlPoint in 'Flame\ControlPoint.pas',
-  RndFlame in 'Flame\RndFlame.pas',
-  Regstry in 'IO\Regstry.pas',
+  {$endif}
   Binary in 'IO\Binary.pas',
-  Hibernation in 'IO\Hibernation.pas',
+  Translation in 'Core\Translation.pas',
+  LibXmlComps in 'System\LibXmlComps.pas',
+  LibXmlParser in 'System\LibXmlParser.pas',
+  RegexHelper in 'System\RegexHelper.pas',
+  Global in 'Core\Global.pas',
+  MissingPlugin in 'IO\MissingPlugin.pas',
+  Regstry in 'IO\Regstry.pas',
+  ParameterIO in 'IO\ParameterIO.pas',
+  Bezier in 'Core\Bezier.pas',
+  RndFlame in 'Flame\RndFlame.pas',
+  ControlPoint in 'Flame\ControlPoint.pas',
+  cmapdata in 'ColorMap\cmapdata.pas',
+  cmap in 'ColorMap\cmap.pas',
+  GradientHlpr in 'ColorMap\GradientHlpr.pas',
+  XFormMan in 'Core\XFormMan.pas',
+  XForm in 'Flame\XForm.pas',
+  BaseVariation in 'Core\BaseVariation.pas',
   RenderingCommon in 'Renderer\RenderingCommon.pas',
+  RenderingInterface in 'Renderer\RenderingInterface.pas',
+  RenderingImplementation in 'Renderer\RenderingImplementation.pas',
   BucketFillerThread in 'Renderer\BucketFillerThread.pas',
   ImageMaker in 'Renderer\ImageMaker.pas',
-  RenderingImplementation in 'Renderer\RenderingImplementation.pas',
-  RenderingInterface in 'Renderer\RenderingInterface.pas',
-
   varHemisphere in 'Variations\varHemisphere.pas',
   varLog in 'Variations\varLog.pas',
   varPolar2 in 'Variations\varPolar2.pas',
@@ -41,8 +44,8 @@ uses
   varFan2 in 'Variations\varFan2.pas',
   varCross in 'Variations\varCross.pas',
   varWedge in 'Variations\varWedge.pas',
-{*} varEpispiral in 'Variations\varEpispiral.pas',
-  varBwraps in 'Variations\varBwraps.pas', 
+  varEpispiral in 'Variations\varEpispiral.pas',
+  varBwraps in 'Variations\varBwraps.pas',
   varPDJ in 'Variations\varPDJ.pas',
   varJuliaN in 'Variations\varJuliaN.pas',
   varJuliaScope in 'Variations\varJuliaScope.pas',
@@ -54,41 +57,43 @@ uses
   varBlurCircle in 'Variations\varBlurCircle.pas',
   varBlurZoom in 'Variations\varBlurZoom.pas',
   varBlurPixelize in 'Variations\varBlurPixelize.pas',
-  // falloff2
+  varFalloff2 in 'Variations\varFalloff2.pas',
   varRectangles in 'Variations\varRectangles.pas',
   varSplits in 'Variations\varSplits.pas',
-  // separation
-  // bipolar
-  // loonie
-  // escher
-  // scry
-  // ngon
-  // foci
-  // lazysusan
-  // spher
-  // mobius
-  // flux
-  // shredrad
+  varSeparation in 'Variations\varSeparation.pas',
+  varBipolar in 'Variations\varBipolar.pas',
+  varLoonie in 'Variations\varLoonie.pas',
+  varEscher in 'Variations\varEscher.pas',
+  varScry in 'Variations\varScry.pas',
+  varNGon in 'Variations\varNGon.pas',
+  varFoci in 'Variations\varFoci.pas',
+  varLazysusan in 'Variations\varLazysusan.pas',
+  varMobius in 'Variations\varMobius.pas',
+  varCrop in 'Variations\varCrop.pas',
   varElliptic in 'Variations\varElliptic.pas',
-  // waves2
-  // auger
-  // glynnsim2
+  varWaves2 in 'Variations\varWaves2.pas',
+  varAuger in 'Variations\varAuger.pas',
   varPreSpherical in 'Variations\varPreSpherical.pas',
   varPreSinusoidal in 'Variations\varPreSinusoidal.pas',
   varPreDisc in 'Variations\varPreDisc.pas',
   varPreBwraps in 'Variations\varPreBwraps.pas',
-  // pre_crop
+  varPreCrop in 'Variations\varPreCrop.pas',
+  varPreFalloff2 in 'Variations\varPreFalloff2.pas',
   varPostBwraps in 'Variations\varPostBwraps.pas',
   varPostCurl in 'Variations\varPostCurl.pas',
-  // post_crop
+  varPostCurl3D in 'Variations\varPostCurl3D.pas',
+  varPostCrop in 'Variations\varPostCrop.pas',
+  varPostFalloff2 in 'Variations\varPostFalloff2.pas',
   varGenericPlugin in 'Variations\varGenericPlugin.pas',
-
-  ParameterIO in 'IO\ParameterIO.pas',
-  MissingPlugin in 'IO\MissingPlugin.pas',
-  Diagnostics in 'Core\Diagnostics.pas',
-  Main in 'Main.pas';
+  Logging in 'Core\Logging.pas',
+  Main in 'Main.pas',
+  Params in 'Params.pas';
 
 //implementation
+  procedure ParametersUpdateDependencies; stdcall; export;
+  begin
+    InternalUpdateParameterDependencies;
+  end;
   procedure ParametersSetParameterString(input : PChar); stdcall; export;
   begin
     InternalSetParameterString(input);
@@ -145,7 +150,11 @@ uses
   end;
   procedure ApophysisInitializePlugin(directory, name: PChar); stdcall; export;
   begin
+    {$ifdef Apo7X64}
+    Exit;
+    {$else}
     InternalInitializePlugin(directory, name);
+    {$endif}
   end;
   procedure ApophysisInitializeLibrary; stdcall; export;
   begin
@@ -154,6 +163,10 @@ uses
   procedure ApophysisDestroyLibrary; stdcall; export;
   begin
     InternalDestroyLibrary;
+  end;
+  procedure ApophysisSetLogEnabled(input: integer); stdcall; export;
+  begin
+    InternalSetLogEnabled(input);
   end;
 
   function ApophysisStartRenderingProcessAndWait(dc: HDC): integer; stdcall; export;
@@ -168,28 +181,103 @@ uses
   begin
     Result := InternalStartSamplingCustomBufferAndWait(dc);
   end;
+  function ApophysisStartSlimRenderingProcessAndWait(dc: HDC): integer; stdcall; export;
+  begin
+    Result := InternalStartSlimRenderingProcessAndWait(dc);
+  end;
+  procedure ApophysisCancelRenderingProcess; stdcall; export;
+  begin
+    InternalCancelRenderingProcess;
+  end;
 
   function ApophysisGetRegisteredNameCount: integer; stdcall; export;
   begin
     Result := InternalGetRegisteredNameCount;
   end;
-  function ApophysisGetRegisteredNameAt(index: integer): PChar; stdcall; export;
+  function ApophysisGetRegisteredNameAt(index: integer; var buf: string): integer; stdcall; export;
+  var str: string;
+  var chars: PChar;
   begin
-    Result := InternalGetRegisteredNameAt(index);
+    Result := InternalGetRegisteredNameAt(index, str); chars := PChar(str);
+    Buf := str; //Move(chars, buf, Result * SizeOf(Char));
   end;
   function ApophysisGetRegisteredAttribCount: integer; stdcall; export;
   begin
     Result := InternalGetRegisteredAttribCount;
   end;
-  function ApophysisGetRegisteredAttribAt(index: integer): PChar; stdcall; export;
+  function ApophysisGetRegisteredAttribAt(index: integer; var buf: string): integer; stdcall; export;
+  var str: string;
+  var chars: PChar;
   begin
-    Result := InternalGetRegisteredAttribAt(index);
+    Result := InternalGetRegisteredAttribAt(index, str);  chars := PChar(str);
+    Buf := str; //Move(chars, buf, Result * SizeOf(Char));
+  end;
+
+  procedure FLName(v: PChar); stdcall; export; begin Params.SetName(String(v)); end;
+  procedure FLBrightness(v: Double); stdcall; export; begin Params.SetBrightness(v); end;
+  procedure FLVibrancy(v: Double); stdcall; export; begin Params.SetVibrancy(v); end;
+  procedure FLGamma(v: Double); stdcall; export; begin Params.SetGamma(v); end;
+  procedure FLGammaThreshold(v: Double); stdcall; export; begin Params.SetGammaThreshold(v); end;
+  procedure FLOversample(v: Integer); stdcall; export; begin Params.SetOversample(v); end;
+  procedure FLFilter(v: Double); stdcall; export; begin Params.SetFilter(v); end;
+  procedure FLZoom(v: Double); stdcall; export; begin Params.SetZoom(v); end;
+  procedure FLScale(v: Double); stdcall; export; begin Params.SetScale(v); end;
+  procedure FLQuality(v: Double); stdcall; export; begin Params.SetQuality(v); end;
+  procedure FLAngle(v: Double); stdcall; export; begin Params.SetAngle(v); end;
+  procedure FLRotate(v: Double); stdcall; export; begin Params.SetRotate(v); end;
+  procedure FLCamPitch(v: Double); stdcall; export; begin Params.SetCamPitch(v); end;
+  procedure FLCamYaw(v: Double); stdcall; export; begin Params.SetCamYaw(v); end;
+  procedure FLCamPerspective(v: Double); stdcall; export; begin Params.SetCamPerspective(v); end;
+  procedure FLCamDist(v: Double); stdcall; export; begin Params.SetCamDist(v); end;
+  procedure FLCamZPos(v: Double); stdcall; export; begin Params.SetCamZPos(v); end;
+  procedure FLCamDof(v: Double); stdcall; export; begin Params.SetCamDof(v); end;
+  procedure FLEstimatorRadius(v: Double); stdcall; export; begin Params.SetEstimatorRadius(v); end;
+  procedure FLEstimatorMinimum(v: Double); stdcall; export; begin Params.SetEstimatorMinimum(v); end;
+  procedure FLEstimatorCurve(v: Double); stdcall; export; begin Params.SetEstimatorCurve(v); end;
+  procedure FLEnableDE(v: Integer); stdcall; export; begin Params.SetEnableDE(v <> 0); end;
+  procedure FLCenter(v1, v2: Double); stdcall; export; begin Params.SetCenter(v1, v2); end;
+  procedure FLSize(v1, v2: Double); stdcall; export; begin Params.SetSize(v1, v2); end;
+  procedure FLBackground(v1, v2, v3: Integer); stdcall; export; begin Params.SetBackground(v1, v2, v3); end;
+  procedure FLSoloXForm(v: Integer); stdcall; export; begin Params.SetSoloXForm(v); end;
+  procedure FLCMap(i, r, g, b: integer); stdcall; export; begin Params.SetCMapPos(i, r, g, b); end;
+
+  procedure FLFinalEnabled(v: Integer); stdcall; export; begin Params.SetFinalEnabled(v <> 0); end;
+  procedure FLFinalCoefs(i: Integer; v: Double); stdcall; export; begin Params.SetFinalCoefs(i, v); end;
+  procedure FLFinalPost(i: Integer; v: Double); stdcall; export; begin Params.SetFinalPost(i, v); end;
+  procedure FLFinalColor(v: Double); stdcall; export; begin Params.SetFinalColor(v); end;
+  procedure FLFinalVarColor(v: Double); stdcall; export; begin Params.SetFinalVarColor(v); end;
+  function  FLFinalVar(k: PChar; v: Double): Boolean; stdcall; export; begin Result := Params.SetFinalVar(String(k), v); end;
+
+  procedure FLXName(i: Integer; v: PChar); stdcall; export; begin Params.SetXName(i, String(v)); end;
+  procedure FLXWeight(i: Integer; v: Double); stdcall; export; begin Params.SetXWeight(i, v); end;
+  procedure FLXColorSpeed(i: Integer; v: Double); stdcall; export; begin Params.SetXColorSpeed(i, v); end;
+  procedure FLXChaos(i, j: Integer; v: Double); stdcall; export; begin Params.SetXChaos(i, j, v); end;
+  procedure FLXOpacity(i: Integer; v: Double); stdcall; export; begin Params.SetXOpacity(i, v); end;
+  procedure FLXCoefs(i, j: Integer; v: Double); stdcall; export; begin Params.SetXCoefs(i, j, v); end;
+  procedure FLXPost(i, j: Integer; v: Double); stdcall; export; begin Params.SetXPost(i, j, v); end;
+  procedure FLXColor(i: Integer; v: Double); stdcall; export; begin Params.SetXColor(i, v); end;
+  procedure FLXVarColor(i: Integer; v: Double); stdcall; export; begin Params.SetXVarColor(i, v); end;
+  function  FLXVar(i: Integer; k: PChar; v: Double): Boolean; stdcall; export; begin Result := Params.SetXVar(i, String(k), v); end;
+
+  procedure FLReset; stdcall; export; begin Params.Reset; end;
+  procedure FLApplyFinal; stdcall; export; begin Params.ApplyFinal; end;
+
+  function  FLToString(var buf: string): integer; stdcall; export; begin
+    Buf := Params.FlameToString;
+    Result := Length(Buf);
+  end;
+  function  FLRandomToFile(fn: string; batchSize, width, height: integer): integer; stdcall; export; var r : boolean; begin
+    r := Params.WriteBatchTo(fn, batchSize, width, height);
+    if r then Result := 1
+    else Result := 0;
   end;
 
 exports
   ApophysisStartRenderingProcessAndWait,
   ApophysisStartSamplingProcessAndWait,
   ApophysisStartSamplingCustomBufferAndWait,
+  ApophysisStartSlimRenderingProcessAndWait,
+  ApophysisCancelRenderingProcess,
   ApophysisSetThreadingLevel,
   ApophysisInitializePlugin,
   ApophysisInitializeLibrary,
@@ -198,7 +286,9 @@ exports
   ApophysisGetRegisteredNameAt,
   ApophysisGetRegisteredAttribCount,
   ApophysisGetRegisteredAttribAt,
-  
+  ApophysisSetLogEnabled,
+
+  ParametersUpdateDependencies,
   ParametersSetParameterString,
   ParametersSetBufferSavePathString,
   ParametersSetPluginSearchPathString,
@@ -211,7 +301,57 @@ exports
 
   EventsSetOnOperationChangeCallback,
   EventsSetOnProgressCallback,
-  EventsSetOnRequestBufferCallback;
-  
+  EventsSetOnRequestBufferCallback,
+
+  FLName,
+  FLVibrancy,
+  FLBrightness,
+  FLGamma,
+  FLGammaThreshold,
+  FLOversample,
+  FLFilter,
+  FLZoom,
+  FLScale,
+  FLQuality,
+  FLAngle,
+  FLRotate,
+  FLCamPitch,
+  FLCamYaw,
+  FLCamPerspective,
+  FLCamDist,
+  FLCamZPos,
+  FLCamDof,
+  FLEstimatorRadius,
+  FLEstimatorMinimum,
+  FLEstimatorCurve,
+  FLEnableDE,
+  FLCenter,
+  FLSize,
+  FLBackground,
+  FLSoloXForm,
+  FLCMap,
+
+  FLFinalEnabled,
+  FLFinalCoefs,
+  FLFinalPost,
+  FLFinalColor,
+  FLFinalVarColor,
+  FLFinalVar,
+
+  FLXName,
+  FLXWeight,
+  FLXColorSpeed,
+  FLXChaos,
+  FLXOpacity,
+  FLXCoefs,
+  FLXPost,
+  FLXColor,
+  FLXVarColor,
+  FLXVar,
+
+  FLReset,
+  FLApplyFinal,
+  FLToString,
+  FLRandomToFile;
 begin end.
 

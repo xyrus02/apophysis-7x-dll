@@ -26,7 +26,7 @@ unit ImageMaker;
 interface
 
 uses
-  Windows, Graphics, ControlPoint, RenderingCommon, PngImage, Diagnostics;
+  Windows, Graphics, ControlPoint, RenderingCommon, PngImage, Bezier;
 
 type TPalette = record
     logpal : TLogPalette;
@@ -381,6 +381,7 @@ var
   filterValue: double;
 //  filterpos: Integer;
   lsa: array[0..1024] of double;
+  csa: array[0..3] of array[0..256] of double;
   sample_density: extended;
   gutter_width: integer;
   k1, k2: double;
@@ -394,6 +395,8 @@ var
   scf:boolean;
   scfact : double;
   acc : integer;
+  avg, fac: double;
+  curvesSet: boolean;
 
   GetBucket: function(x, y: integer): TBucket of object;
   bucket: TBucket;
@@ -410,7 +413,8 @@ begin
   notvib := 256 - vib;
 
   if fcp.gamma_threshold <> 0 then
-    funcval := power(fcp.gamma_threshold, gamma - 1); { / fcp.gamma_threshold; }
+    funcval := power(fcp.gamma_threshold, gamma - 1) { / fcp.gamma_threshold; }
+  else funcval := 0;
 
   bgi[0] := round(fcp.background[0]);
   bgi[1] := round(fcp.background[1]);
@@ -421,6 +425,16 @@ begin
   zero_BG.red := 0;
   zero_BG.green := 0;
   zero_BG.blue := 0;
+
+  curvesSet := true;
+  for i := 0 to 3 do
+    curvesSet := curvesSet and (
+      ((fcp.curvePoints[i][0].x = 0) and (fcp.curvePoints[i][0].y = 0)) and
+      ((fcp.curvePoints[i][1].x = 0) and (fcp.curvePoints[i][1].y = 0)) and
+      ((fcp.curvePoints[i][2].x = 1) and (fcp.curvePoints[i][2].y = 1)) and
+      ((fcp.curvePoints[i][3].x = 1) and (fcp.curvePoints[i][3].y = 1))
+    );
+  curvesSet := not curvesSet;
 
   gutter_width := FBucketwidth - FOversample * fcp.Width;
 //  gutter_width := 2 * ((25 - Foversample) div 2);
@@ -437,9 +451,17 @@ begin
   area := FBitmap.Width * FBitmap.Height / (fcp.ppux * fcp.ppuy);
   k2 := (FOversample * FOversample) / (fcp.Contrast * area * fcp.White_level * sample_density);
 
-  lsa[0] := 0;
-  for i := 1 to 1024 do begin
-    lsa[i] := (k1 * log10(1 + fcp.White_level * i * k2)) / (fcp.White_level * i);
+  csa[0][0] := 0; csa[1][0] := 0; csa[2][0] := 0; csa[3][0] := 0;
+  for i := 0 to 1024 do begin
+    if i = 0 then lsa[0] := 0
+    else lsa[i] := (k1 * log10(1 + fcp.White_level * i * k2)) / (fcp.White_level * i);
+
+    if i <= 256 then begin
+      csa[0][i] := BezierFunc(i / 256.0, fcp.curvePoints[0], fcp.curveWeights[0]) * 256;
+      csa[1][i] := BezierFunc(i / 256.0, fcp.curvePoints[1], fcp.curveWeights[1]) * 256;
+      csa[2][i] := BezierFunc(i / 256.0, fcp.curvePoints[2], fcp.curveWeights[2]) * 256;
+      csa[3][i] := BezierFunc(i / 256.0, fcp.curvePoints[3], fcp.curveWeights[3]) * 256;
+    end;
   end;
 
   ls := 0;
@@ -598,7 +620,10 @@ zero_alpha:
           bi := Round(ls * fp[2]);
         end;
 
-        // ignoring BG color in transparent renders...
+        // ignoring BG color in transparent renders..
+        if (ri >= 0) and (ri <= 256) and (curvesSet) then ri := Round(csa[1][Round(csa[0][ri])]);
+        if (gi >= 0) and (gi <= 256) and (curvesSet) then gi := Round(csa[2][Round(csa[0][gi])]);
+        if (bi >= 0) and (bi <= 256) and (curvesSet) then bi := Round(csa[3][Round(csa[0][bi])]);
 
         ri := (ri * 255) div ai; // ai > 0 !
         if (ri < 0) then ri := 0
@@ -649,6 +674,10 @@ zero_alpha:
           gi := Round(ls * fp[1]);
           bi := Round(ls * fp[2]);
         end;
+
+        if (ri >= 0) and (ri <= 256) and (curvesSet) then ri := Round(csa[1][Round(csa[0][ri])]);
+        if (gi >= 0) and (gi <= 256) and (curvesSet) then gi := Round(csa[2][Round(csa[0][gi])]);
+        if (bi >= 0) and (bi <= 256) and (curvesSet) then bi := Round(csa[3][Round(csa[0][bi])]);
 
         ri := ri + (ia * bgi[0]) shr 8;
         if (ri < 0) then ri := 0
@@ -708,8 +737,8 @@ begin
       end;
       //else Exception.CreateFmt('Unexpected value of PNGTransparency [%d]', [PNGTransparency]);
 
-      if (FParameters <> '') then
-        PngObject.AddtEXt('Parameters', FParameters);
+      {if (FParameters <> '') then
+        PngObject.AddtEXt('Parameters', FParameters); }
       PngObject.SaveToFile(FileName);
     except
       pngError := true;
