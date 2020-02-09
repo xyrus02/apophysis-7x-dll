@@ -3,14 +3,17 @@ unit varJuliaN;
 interface
 
 uses
-  BaseVariation, XFormMan, AsmRandom;
+  BaseVariation, XFormMan;
 
 const
   var_name = 'julian';
   var_n_name='julian_power';
   var_c_name='julian_dist';
 
-{$define _ASM_}
+{$ifdef Apo7X64}
+{$else}
+  {$define _ASM_}
+{$endif}
 
 type
   TVariationJulian = class(TBaseVariation)

@@ -22,16 +22,22 @@
 }
 unit RenderingImplementation;
 
-{$define _ASM_}
+{$ifdef Apo7X64}
+{$else}
+  {$define _ASM_}
+{$endif}
 
 interface
 
 uses
+{$ifdef Apo7X64}
+{$else}
+AsmRandom,
+{$endif}
   Windows, Classes, Forms, Graphics, Global,
   RenderingInterface, Xform, Math, Translation,
-  AsmRandom, Hibernation, Diagnostics, Binary,
-  ControlPoint, Sysutils, BucketFillerThread,
-  RenderingCommon;
+  Binary, RenderingCommon, ControlPoint, Sysutils,
+  BucketFillerThread;
 
 type
   TBatchProc = procedure of object;
@@ -44,6 +50,7 @@ type
 
     procedure Prepare; override;
     procedure SetPixels; override;
+    procedure SetPixelsSlim; override;
 
   protected
     procedure IterateBatch;
@@ -63,6 +70,7 @@ type
     function NewThread: TBucketFillerThread;
     procedure Prepare; override;
     procedure SetPixels; override;
+    procedure SetPixelsSlim; override;
     
   protected
     procedure AddPointsToBuckets(const points: TPointsArray);
@@ -74,7 +82,23 @@ type
 
     procedure Pause; override;
     procedure UnPause; override;
+end;
 
+type
+  TRenderWorkerST_MM = class(TRenderWorkerST)
+  protected
+    procedure CalcBufferSize; override;
+  public
+    procedure Render; override;
+
+end;
+
+type
+  TRenderWorkerMT_MM = class(TRenderWorkerMT)
+  protected
+    procedure CalcBufferSize; override;
+  public
+    procedure Render; override;
 end;
 
 // ----------------------------------------------------------------------------
@@ -116,10 +140,10 @@ var
   nsamples: int64;
   IterateBatchProc: procedure of object;
 begin
-  {if FNumSlices > 1 then
+  if FNumSlices > 1 then
     TimeTrace(Format(TextByKey('common-trace-rendering-multipleslices'), [FSlice + 1, FNumSlices]))
   else
-    TimeTrace(TextByKey('common-trace-rendering-oneslice')); }
+    TimeTrace(TextByKey('common-trace-rendering-oneslice'));
 
   Randomize;
 
@@ -160,16 +184,55 @@ begin
 
   Progress(1);
 end;
+procedure TRenderWorkerST.SetPixelsSlim;
+var
+  i: integer;
+  nsamples: int64;
+  IterateBatchProc: procedure of object;
+begin
+  if FCP.FAngle = 0 then begin
+    if UseFinalXform then
+      IterateBatchProc := IterateBatchFX
+    else
+      IterateBatchProc := IterateBatch;
+  end
+  else begin
+    if UseFinalXform then
+      IterateBatchProc := IterateBatchAngleFX
+    else
+      IterateBatchProc := IterateBatchAngle;
+  end;
+
+  NSamples := Round(sample_density * NrSlices * bucketSize / (oversample * oversample));
+  FNumBatches := Round(nsamples / (fcp.nbatches * SUB_BATCH_SIZE));
+  if FNumBatches = 0 then FNumBatches := 1;
+
+  FMinBatches := Round(FNumBatches * FMinDensity / fcp.sample_density);
+  if FMinBatches = 0 then FMinBatches := 1;
+
+  for i := 0 to FNumBatches-1 do begin
+    if FStop <> 0 then begin
+      fcp.actual_density := fcp.actual_density + fcp.sample_density * i / FNumBatches;
+      FNumBatches := i;
+      exit;
+    end;
+
+    IterateBatchProc;
+    Inc(FBatch);
+  end;
+
+  fcp.actual_density := fcp.actual_density + fcp.sample_density;
+end;
 procedure TRenderWorkerMT.SetPixels;
 var
   i: integer;
   nSamples: Int64;
   bc : integer;
 begin
-  {if FNumSlices > 1 then
+  if FNumSlices > 1 then
     TimeTrace(Format(TextByKey('common-trace-rendering-multipleslices'), [FSlice + 1, FNumSlices]))
   else
-    TimeTrace(TextByKey('common-trace-rendering-oneslice'));}
+    TimeTrace(TextByKey('common-trace-rendering-oneslice'));
 
   nSamples := Round(sample_density * NrSlices * BucketSize / (oversample * oversample));
   FNumBatches := Round(nSamples / (fcp.nbatches * SUB_BATCH_SIZE));
@@ -215,6 +278,60 @@ begin
   DeleteCriticalSection(CriticalSection);
   Progress(1);
 end;
+procedure TRenderWorkerMT.SetPixelsSlim;
+var
+  i: integer;
+  nSamples: Int64;
+  bc : integer;
+begin
+  nSamples := Round(sample_density * NrSlices * BucketSize / (oversample * oversample));
+  FNumBatches := Round(nSamples / (fcp.nbatches * SUB_BATCH_SIZE));
+  if FNumBatches = 0 then FNumBatches := 1;
+  FMinBatches := Round(FNumBatches * FMinDensity / fcp.sample_density);
+
+  batchcounter := 1;
+  InitializeCriticalSection(CriticalSection);
+  SetLength(WorkingThreads, NumThreads);
+
+  for i := 0 to NumThreads - 1 do
+    WorkingThreads[i] := NewThread;
+
+  for i := 0 to NumThreads - 1 do
+    WorkingThreads[i].Resume;
+
+  for i := 0 to High(WorkingThreads) do begin
+    WorkingThreads[i].Terminate;
+    WorkingThreads[i].WaitFor;
+    WorkingThreads[i].Free;
+  end;
+  SetLength(WorkingThreads, 0);
+
+  fcp.actual_density := fcp.actual_density +
+                        fcp.sample_density * BatchCounter / FNumBatches; // actual quality of incomplete render
+  FNumBatches := BatchCounter;
+
+  DeleteCriticalSection(CriticalSection);
+end;
+
+////////////////////////////////////////////////////////////////////////////////
+// MM OVERRIDES
+////////////////////////////////////////////////////////////////////////////////
+procedure TRenderWorkerST_MM.CalcBufferSize;
+begin
+  CalcBufferSizeMM;
+end;
+procedure TRenderWorkerST_MM.Render;
+begin
+  RenderMM;
+end;
+procedure TRenderWorkerMT_MM.CalcBufferSize;
+begin
+  CalcBufferSizeMM;
+end;
+procedure TRenderWorkerMT_MM.Render;
+begin
+  RenderMM;
+end;
 
 ////////////////////////////////////////////////////////////////////////////////
 // BATCH ITERATION
@@ -224,6 +341,7 @@ var
   i: integer;
   px, py: double;
   Bucket: PBucket;
+  ZBufPos: PDouble;
   MapColor: PColorMapColor;
 
   ix, iy: integer;
@@ -275,11 +393,22 @@ end;
 
       Bucket := @buckets[Round(bhs * py)][Round(bws * px)];
       MapColor := @ColorMap[Round(p.c * 255)];
-
-      Bucket.Red := Bucket.Red + MapColor.Red;
-      Bucket.Green := Bucket.Green + MapColor.Green;
-      Bucket.Blue := Bucket.Blue + MapColor.Blue;
-      Bucket.Count := Bucket.Count + 1;
+      {$ifdef ENABLEZBUF}
+      ZBufPos := @zbuffer[Round(bhs * py)][Round(bws * px)];
+      if (q.z < ZBufPos^) then
+      begin
+        ZBufPos^ := q.z;
+        Bucket.Red := Bucket.Red + MapColor.Red;
+        Bucket.Green := Bucket.Green + MapColor.Green;
+        Bucket.Blue := Bucket.Blue + MapColor.Blue;
+        Bucket.Count := Bucket.Count + 1;
+      end;
+      {$else}
+        Bucket.Red := Bucket.Red + MapColor.Red;
+        Bucket.Green := Bucket.Green + MapColor.Green;
+        Bucket.Blue := Bucket.Blue + MapColor.Blue;
+        Bucket.Count := Bucket.Count + 1;
+      {$endif}
     end;
 
   except
@@ -294,7 +423,7 @@ var
   px, py: double;
   Bucket: PBucket;
   MapColor: PColorMapColor;
-
+  ZBufPos: PDouble;
   ix, iy: integer;
   BmpColor: TColor;
 
@@ -345,10 +474,22 @@ end;
       Bucket := @buckets[Round(bhs * py)][Round(bws * px)];
       MapColor := @ColorMap[Round(p.c * 255)];
 
-      Bucket.Red := Bucket.Red + MapColor.Red;
-      Bucket.Green := Bucket.Green + MapColor.Green;
-      Bucket.Blue := Bucket.Blue + MapColor.Blue;
-      Bucket.Count := Bucket.Count + 1;
+      {$ifdef ENABLEZBUF}
+      ZBufPos := @zbuffer[Round(bhs * py)][Round(bws * px)];
+      if (q.z < ZBufPos^) then
+      begin
+        ZBufPos^ := q.z;
+        Bucket.Red := Bucket.Red + MapColor.Red;
+        Bucket.Green := Bucket.Green + MapColor.Green;
+        Bucket.Blue := Bucket.Blue + MapColor.Blue;
+        Bucket.Count := Bucket.Count + 1;
+      end;
+      {$else}
+        Bucket.Red := Bucket.Red + MapColor.Red;
+        Bucket.Green := Bucket.Green + MapColor.Green;
+        Bucket.Blue := Bucket.Blue + MapColor.Blue;
+        Bucket.Count := Bucket.Count + 1;
+      {$endif}
     end;
 
   except
@@ -363,7 +504,7 @@ var
   px, py: double;
   Bucket: PBucket;
   MapColor: PColorMapColor;
-
+  ZbufPos: PDouble;
   ix, iy: integer;
   BmpColor: TColor;
 
@@ -414,10 +555,22 @@ end;
       Bucket := @buckets[Round(bhs * py)][Round(bws * px)];
       MapColor := @ColorMap[Round(q.c * 255)];
 
-      Bucket.Red := Bucket.Red + MapColor.Red;
-      Bucket.Green := Bucket.Green + MapColor.Green;
-      Bucket.Blue := Bucket.Blue + MapColor.Blue;
-      Bucket.Count := Bucket.Count + 1;
+      {$ifdef ENABLEZBUF}
+      ZBufPos := @zbuffer[Round(bhs * py)][Round(bws * px)];
+      if (q.z < ZBufPos^) then
+      begin
+        ZBufPos^ := q.z;
+        Bucket.Red := Bucket.Red + MapColor.Red;
+        Bucket.Green := Bucket.Green + MapColor.Green;
+        Bucket.Blue := Bucket.Blue + MapColor.Blue;
+        Bucket.Count := Bucket.Count + 1;
+      end;
+      {$else}
+        Bucket.Red := Bucket.Red + MapColor.Red;
+        Bucket.Green := Bucket.Green + MapColor.Green;
+        Bucket.Blue := Bucket.Blue + MapColor.Blue;
+        Bucket.Count := Bucket.Count + 1;
+      {$endif}
     end;
 
   except
@@ -432,7 +585,7 @@ var
   px, py: double;
   Bucket: PBucket;
   MapColor: PColorMapColor;
-
+  ZBufPos: PDouble;
   ix, iy: integer;
   BmpColor: TColor;
 
@@ -483,10 +636,22 @@ end;
       Bucket := @buckets[Round(bhs * py)][Round(bws * px)];
       MapColor := @ColorMap[Round(q.c * 255)];
 
-      Bucket.Red := Bucket.Red + MapColor.Red;
-      Bucket.Green := Bucket.Green + MapColor.Green;
-      Bucket.Blue := Bucket.Blue + MapColor.Blue;
-      Bucket.Count := Bucket.Count + 1;
+      {$ifdef ENABLEZBUF}
+      ZBufPos := @zbuffer[Round(bhs * py)][Round(bws * px)];
+      if (q.z < ZBufPos^) then
+      begin
+        ZBufPos^ := q.z;
+        Bucket.Red := Bucket.Red + MapColor.Red;
+        Bucket.Green := Bucket.Green + MapColor.Green;
+        Bucket.Blue := Bucket.Blue + MapColor.Blue;
+        Bucket.Count := Bucket.Count + 1;
+      end;
+      {$else}
+        Bucket.Red := Bucket.Red + MapColor.Red;
+        Bucket.Green := Bucket.Green + MapColor.Green;
+        Bucket.Blue := Bucket.Blue + MapColor.Blue;
+        Bucket.Count := Bucket.Count + 1;
+      {$endif}
     end;
 
   except
@@ -500,6 +665,7 @@ var
   i: integer;
   px, py: double;
   Bucket: PBucket;
+  ZBufPos: PDouble;
   MapColor: PColorMapColor;
 begin
   for i := SUB_BATCH_SIZE - 1 downto 0 do begin
@@ -511,10 +677,24 @@ begin
     Bucket := @buckets[Round(bhs * py)][Round(bws * px)];
     MapColor := @ColorMap[Round(points[i].c * 255)];
 
-    Bucket.Red := Bucket.Red + MapColor.Red;
-    Bucket.Green := Bucket.Green + MapColor.Green;
-    Bucket.Blue := Bucket.Blue + MapColor.Blue;
-    Bucket.Count := Bucket.Count + 1;
+    if random >= points[i].o then continue;
+
+    {$ifdef ENABLEZBUF}
+    ZBufPos := @zbuffer[Round(bhs * py)][Round(bws * px)];
+    if (points[i].z < ZBufPos^) then
+    begin
+      ZBufPos^ := points[i].z;
+      Bucket.Red := Bucket.Red + MapColor.Red;
+      Bucket.Green := Bucket.Green + MapColor.Green;
+      Bucket.Blue := Bucket.Blue + MapColor.Blue;
+      Bucket.Count := Bucket.Count + 1;
+    end;
+    {$else}
+      Bucket.Red := Bucket.Red + MapColor.Red;
+      Bucket.Green := Bucket.Green + MapColor.Green;
+      Bucket.Blue := Bucket.Blue + MapColor.Blue;
+      Bucket.Count := Bucket.Count + 1;
+    {$endif}
   end;
 end;
 procedure TRenderWorkerMT.AddPointsToBucketsAngle(const points: TPointsArray);
@@ -523,6 +703,7 @@ var
   px, py: double;
   Bucket: PBucket;
   MapColor: PColorMapColor;
+  ZBufPos: PDouble;
 begin
   for i := SUB_BATCH_SIZE - 1 downto 0 do begin
     px := points[i].x * cosa + points[i].y * sina + rcX;
@@ -533,10 +714,24 @@ begin
     Bucket := @buckets[Round(bhs * py)][Round(bws * px)];
     MapColor := @ColorMap[Round(points[i].c * 255)];
 
-    Bucket.Red := Bucket.Red + MapColor.Red;
-    Bucket.Green := Bucket.Green + MapColor.Green;
-    Bucket.Blue := Bucket.Blue + MapColor.Blue;
-    Bucket.Count := Bucket.Count + 1;
+    if random >= points[i].o then continue;
+
+    {$ifdef ENABLEZBUF}
+    ZBufPos := @zbuffer[Round(bhs * py)][Round(bws * px)];
+    if (points[i].z < ZBufPos^) then
+    begin
+      ZBufPos^ := points[i].z;
+      Bucket.Red := Bucket.Red + MapColor.Red;
+      Bucket.Green := Bucket.Green + MapColor.Green;
+      Bucket.Blue := Bucket.Blue + MapColor.Blue;
+      Bucket.Count := Bucket.Count + 1;
+    end;
+    {$else}
+      Bucket.Red := Bucket.Red + MapColor.Red;
+      Bucket.Green := Bucket.Green + MapColor.Green;
+      Bucket.Blue := Bucket.Blue + MapColor.Blue;
+      Bucket.Count := Bucket.Count + 1;
+    {$endif}
   end;
 end;
 

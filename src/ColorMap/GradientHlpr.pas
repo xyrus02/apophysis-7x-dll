@@ -88,6 +88,15 @@ var
   hsv: array[0..2] of double;
   pal: TColorMap;
 begin
+  MinNodes := 2;
+  MaxNodes := 10;
+  MinHue := 0;
+  MinSat := 0;
+  MinLum := 0;
+  MaxHue := 600;
+  MaxSat := 100;
+  MaxLum := 100;
+
   rgb[0] := 0;
   rgb[1] := 0;
   rgb[2] := 0;

@@ -26,14 +26,17 @@ unit varJuliaScope;
 interface
 
 uses
-  BaseVariation, XFormMan, AsmRandom;
+  BaseVariation, XFormMan;
 
 const
   variation_name='juliascope';
   var_n_name='juliascope_power';
   var_c_name='juliascope_dist';
 
-{$define _ASM_}
+{$ifdef Apo7X64}
+{$else}
+  {$define _ASM_}
+{$endif}
 
 type
   TVariationJuliaScope = class(TBaseVariation)

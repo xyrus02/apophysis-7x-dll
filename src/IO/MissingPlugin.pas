@@ -3,10 +3,10 @@ unit MissingPlugin;
 interface
   uses Windows, Global, Classes, ComCtrls, SysUtils,
        ControlPoint, Translation;
-  const RegisteredAttributes : array[0..12] of string = (
+  const RegisteredAttributes : array[0..13] of string = (
     'weight', 'color', 'symmetry', 'color_speed', 'coefs', 'chaos',
     'plotmode', 'opacity', 'post', 'var', 'var1', 'var_color',
-    'name'
+    'name', 'linear3D'
   );
   var  MissingPluginList : TStringList;
        Parsing : boolean;
@@ -49,12 +49,14 @@ implementation
     end;
 
     if MissingPluginList.Count > 0 then begin
+      statusPanelText := Format(TextByKey('main-status-loadingerrorcount'), [MissingPluginList.Count]);
+
       for i := 0 to MissingPluginList.Count - 1 do
         str := str + #13#10 + '  - ' + MissingPluginList[i];
-      ErrorMessageString := Format('Plugins missing in %s:', [cp.name, str2]) + str;
-      //WriteLn('ERROR: ' + ErrorMessageString);
+      ErrorMessageString := Format(TextByKey('main-status-morepluginsneeded'), [cp.name, str2]) + str;
       Result := false;
     end else begin
+      statusPanelText := TextByKey('main-status-noloadingerrors');
       ErrorMessageString := '';
       Result := true;
     end;
@@ -64,5 +66,6 @@ implementation
   procedure AnnoyUser;
   begin
     if (ErrorMessageString = '') or (not WarnOnMissingPlugin) then exit;
+    MessageBox($00000000, PChar(ErrorMessageString), PChar('Apophysis'), MB_ICONHAND or MB_OK);
   end;
 end.

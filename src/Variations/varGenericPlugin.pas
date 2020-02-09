@@ -39,10 +39,8 @@ unit varGenericPlugin;
 interface
 
 uses
-  BaseVariation,  XFormMan, //Mapm,
-  Classes, Diagnostics, //TStrings/TStringList
-  SysUtils, //FindFirst/FindNext/FindClose
-  Forms;  //MessageBox
+  BaseVariation,  XFormMan, Logging, Registry, Global,
+  Classes, SysUtils, Forms;  //TStrings/TStringList
 
 type
   TPluginVariationClass = class of TPluginVariation;
@@ -52,9 +50,9 @@ type
     PluginHandle: THandle;
     PluginClass: TPluginVariationClass;
 
-    PluginVarGetName:           function: PChar; cdecl;
+    PluginVarGetName:           function: PAnsiChar; cdecl;
     PluginVarGetNrVariables:    function: Integer; cdecl;
-    PluginVarGetVariableNameAt: function(const Index: integer): PChar; cdecl;
+    PluginVarGetVariableNameAt: function(const Index: integer): PAnsiChar; cdecl;
 
     PluginVarCreate:       function: Pointer; cdecl;
     PluginVarDestroy:      function(var MyVariation: Pointer): LongBool; cdecl;
@@ -63,9 +61,9 @@ type
     PluginVarInitDC:       function(MyVariation, FPx, FPy, FPz, FTx, FTy, FTz, color: Pointer; vvar, a, b, c, d, e, f: double): LongBool; cdecl;
     PluginVarPrepare:      function(MyVariation: Pointer): LongBool; cdecl;
     PluginVarCalc:         function(MyVariation: Pointer): LongBool; cdecl;
-    PluginVarGetVariable:  function(MyVariation: Pointer; const Name: PChar; var value: double): LongBool; cdecl;
-    PluginVarSetVariable:  function(MyVariation: Pointer; const Name: PChar; var value: double): LongBool; cdecl;
-    PluginVarResetVariable:function(MyVariation: Pointer; const Name: PChar) : LongBool; cdecl;
+    PluginVarGetVariable:  function(MyVariation: Pointer; const Name: PAnsiChar; var value: double): LongBool; cdecl;
+    PluginVarSetVariable:  function(MyVariation: Pointer; const Name: PAnsiChar; var value: double): LongBool; cdecl;
+    PluginVarResetVariable:function(MyVariation: Pointer; const Name: PAnsiChar) : LongBool; cdecl;
   end;
   PPluginData = ^TPluginData;
 
@@ -75,7 +73,6 @@ type
   private
     PluginData : TPluginData;
     MyVariation : Pointer;
-
   public
     constructor Create(varData : TPluginData);
     destructor Destroy; override;
@@ -119,7 +116,11 @@ uses
   Windows, //LoadLibrary
   Math;
 
+{$ifdef Apo7XDLL}
 var enumerated : boolean;
+{$else}
+var pluginError:string;
+{$endif}
 
 { TPluginVariation }
 
@@ -137,7 +138,7 @@ end;
 
 function TVariationPluginLoader.GetName : string;
 begin
-  Result := PluginData.PluginVarGetName;
+  Result := String(PluginData.PluginVarGetName);
 end;
 
 function TVariationPluginLoader.GetInstance: TBaseVariation;
@@ -152,7 +153,7 @@ end;
 
 function TVariationPluginLoader.GetVariableNameAt(const Index: integer): string;
 begin
-  Result := PluginData.PluginVarGetVariableNameAt(Index);
+  Result := String(PluginData.PluginVarGetVariableNameAt(Index));
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -211,19 +212,19 @@ end;
 ///////////////////////////////////////////////////////////////////////////////
 function TPluginVariation.GetVariableNameAt(const Index: integer): string;
 begin
-  Result := PluginData.PluginVarGetVariableNameAt(Index);
+  Result := String(PluginData.PluginVarGetVariableNameAt(Index));
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
 function TPluginVariation.SetVariable(const Name: string; var value: double): boolean;
 begin
-  Result := PluginData.PluginVarSetVariable(MyVariation,PChar(Name),value);
+  Result := PluginData.PluginVarSetVariable(MyVariation,PAnsiChar(AnsiString(Name)),value);
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
 function TPluginVariation.GetVariable(const Name: string; var value: double): boolean;
 begin
-  Result := PluginData.PluginVarGetVariable(MyVariation,PChar(Name),value);
+  Result := PluginData.PluginVarGetVariable(MyVariation,PAnsiChar(AnsiString(Name)),value);
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -232,10 +233,10 @@ var
   dummy: double;
 begin
   if @PluginData.PluginVarResetVariable <> nil then
-    Result := PluginData.PluginVarResetVariable(MyVariation, PChar(Name))
+    Result := PluginData.PluginVarResetVariable(MyVariation, PAnsiChar(AnsiString(Name)))
   else begin
     dummy := 0;
-    Result := PluginData.PluginVarSetVariable(MyVariation,PChar(Name), dummy);
+    Result := PluginData.PluginVarSetVariable(MyVariation,PAnsiChar(AnsiString(Name)), dummy);
   end;
 end;
 
@@ -254,7 +255,11 @@ begin
   	  if @PluginVarGetName = nil then begin  // Must not be a valid plugin!
   		  FreeLibrary(PluginHandle);
   		  msg := 'Invalid plugin type: "' + filename + '" is not a plugin';
+        {$ifdef Apo7XDLL}
   		  LogWrite('ERROR|' + msg, 'general.log');
+        {$else}
+        pluginError := pluginError + msg + #13#10;
+        {$endif}
   		  Exit;
   	  end;
 
@@ -262,7 +267,11 @@ begin
       if GetVariationIndex(name) >= 0 then begin
         FreeLibrary(PluginHandle);
         msg := 'Cannot load plugin from ' + filename + ': variation "' + name + '" already exists!';
+        {$ifdef Apo7XDLL}
         LogWrite('ERROR|' + msg, 'general.log');
+        {$else}
+        pluginError := pluginError + msg + #13#10;
+        {$endif}
       end else begin
         @PluginVarGetNrVariables    := GetProcAddress(PluginHandle,'PluginVarGetNrVariables');
         @PluginVarGetVariableNameAt := GetProcAddress(PluginHandle,'PluginVarGetVariableNameAt');
@@ -277,44 +286,81 @@ begin
       	@PluginVarSetVariable       := GetProcAddress(PluginHandle,'PluginVarSetVariable');
       	@PluginVarResetVariable     := GetProcAddress(PluginHandle,'PluginVarResetVariable');
       	RegisterVariation(TVariationPluginLoader.Create(PluginData), @PluginVarInit3D <> nil, @PluginVarInitDC <> nil);
+        RegisterVariationFile(pluginpath + '\' + filename, name);
+        {$ifdef Apo7XDLL}
       	LogWrite('INFO|Successfully loaded "' + filename + '"', 'general.log');
+        {$endif}
       end;
     end else begin
   	  errno := GetLastError;
       errstr := SysErrorMessage(errno);
       msg := 'Cannot open plugin file: ' + filename + ' (Win32-code ' + IntToStr(GetLastError) + ')';
+      {$ifdef Apo7XDLL}
       LogWrite('ERROR|' + msg, 'general.log');
+      {$else}
+      pluginError := pluginError + msg + #13#10;
+      {$endif}
     end;
   end;
 end;
 
+{$ifdef Apo7XDLL}
 procedure InitializePlugins(pluginpath: string);
+{$else}
+procedure InitializePlugins;
+{$endif}
 var
+  Registry: TRegistry;
   searchResult: TSearchRec;
   name, msg: string;
   PluginData : TPluginData;
   errno:integer;
   errstr:string;
 begin
+{$ifdef Apo7XDLL}
   if not enumerated then enumerated := true
   else exit;
+{$else}
+  Registry := TRegistry.Create;
+  try
+    Registry.RootKey := HKEY_CURRENT_USER;
+    { Defaults }
+    if Registry.OpenKey('Software\' + APP_NAME + '\Defaults', False) then
+      if Registry.ValueExists('PluginPath') then begin
+        PluginPath := Registry.ReadString('PluginPath');
+      end else begin
+        PluginPath := ExtractFilePath(Application.ExeName) + 'Plugins\';
+      end
+    else PluginPath := ExtractFilePath(Application.ExeName) + 'Plugins\';
+    Registry.CloseKey;
+  finally
+    Registry.Free;
+  end;
+{$endif}
 
   NumBuiltinVars := NRLOCVAR + GetNrRegisteredVariations;
 
   // Try to find regular files matching *.dll in the plugins dir
-  if FindFirst(pluginpath + '\*.dll', faAnyFile, searchResult) = 0 then
+  {$ifdef Apo7XDLL}
+  pluginPath := PluginPath + '\';
+  {$endif}
+  if FindFirst(pluginpath + '*.dll', faAnyFile, searchResult) = 0 then
   begin
     repeat InitializePlugin(pluginpath, searchResult.Name);
     until (FindNext(searchResult) <> 0);
     SysUtils.FindClose(searchResult); //Since we use Windows unit (LoadLibrary)
   end;
+
+  {$ifdef Apo7XDLL}
+  {$else}
+  if pluginError <> '' then
+      Application.MessageBox(
+        PChar('There were problems with some of the plugins:' + #13#10#13#10 + pluginError),
+        PChar('Warning'), MB_ICONWARNING or MB_OK);
+  {$endif}
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-initialization
-  //InitializePlugins;
-
 end.
-
 

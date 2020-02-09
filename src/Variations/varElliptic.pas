@@ -30,6 +30,9 @@ uses
 
 type
   TVariationElliptic = class(TBaseVariation)
+  private
+	v: double;
+	
   public
     constructor Create;
 
@@ -44,6 +47,7 @@ type
 
 
     procedure CalcFunction; override;
+	procedure Prepare; override;
   end;
 
 implementation
@@ -53,28 +57,31 @@ uses
 
 
 ///////////////////////////////////////////////////////////////////////////////
+procedure TVariationElliptic.Prepare;
+begin
+	v := VVAR / (PI / 2.0)
+end;
 procedure TVariationElliptic.CalcFunction;
+function sqrt_safe(x: double): double;
+	begin
+		if x < 0.0 then Result := 0.0
+		else Result := sqrt(x);
+	end;
 var
-  a, b, c, tmp, x2, xmax: double;
+  a, b, tmp, x2, xmax: double;
 begin
   tmp := sqr(FTy^) + sqr(FTx^) + 1.0;
 	x2 := 2.0 * FTx^;
 	xmax := 0.5 * (sqrt(tmp + x2) + sqrt(tmp - x2));
 
 	a := FTx^ / xmax;
-	b := 1.0 - sqr(a);
-  c := xmax - 1.0;
-
-  if (b > 0) then b := sqrt(b)
-  else b := 0;
-
-  if (c > 0) then c := sqrt(c)
-  else c := 0;
+	b := sqrt_safe(1.0 - sqr(a));
 
   FPz^ := FPz^ + vvar * FTz^;
-  FPx^ := FPx^ + (2.0 * vvar / PI) * ArcTan2(a, b);
-  if (FTy^ > 0) then FPy^ := FPy^ + (2.0 * vvar / PI) * Ln(xmax + c)
-  else FPy^ := FPy^ - (2.0 * vvar / PI) * Ln(xmax + c)
+  FPx^ := FPx^ + v * ArcTan2(a, b);
+  
+  if (FTy^ > 0) then FPy^ := FPy^ + v * Ln(xmax + sqrt_safe(xmax - 1.0))
+  else FPy^ := FPy^ - v * Ln(xmax + sqrt_safe(xmax - 1.0))
 end;
 
 ///////////////////////////////////////////////////////////////////////////////

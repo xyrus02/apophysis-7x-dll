@@ -55,23 +55,13 @@ implementation
 
 uses
   Math;
-
-procedure SinCosA(const Theta: double; var Sin, Cos: double); // to avoid using 'extended' type
-asm
-    FLD     Theta
-    FSINCOS
-    FSTP    qword ptr [edx]    // Cos
-    FSTP    qword ptr [eax]    // Sin
-    FWAIT
-end;
-
 ///////////////////////////////////////////////////////////////////////////////
 procedure TVariationPreBwraps.Prepare;
 var
   max_bubble, radius: double;
 begin
   radius := 0.5 * (pre_bwraps_cellsize / (1.0 + sqr(pre_bwraps_space)));
-  g2 := sqr(pre_bwraps_gain) / radius + 1e-6;
+  g2 := sqr(pre_bwraps_gain) / (radius + 1e-6) + 1e-6;
   max_bubble := g2 * radius;
 
   if (max_bubble > 2.0) then max_bubble := 1.0
@@ -111,7 +101,7 @@ begin
 
       r := (sqr(Lx) + sqr(Ly)) / r2;
       theta := pre_bwraps_inner_twist * (1.0 - r) + pre_bwraps_outer_twist * r;
-      SinCosA(theta, s, c);
+      SinCos(theta, s, c);
 
       Vx := Cx + c * Lx + s * Ly;
       Vy := Cy - s * Lx + c * Ly;
@@ -213,6 +203,7 @@ function TVariationPreBwraps.GetVariable(const Name: string; var value: double):
 begin
   Result := False;
   if Name = 'pre_bwraps_cellsize' then begin
+    if Value = 0 then Value := 1e-6;
     Value := pre_bwraps_cellsize;
     Result := True;
   end else if Name = 'pre_bwraps_space' then begin
