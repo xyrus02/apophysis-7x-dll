@@ -71,3 +71,10 @@ modules/
 
 # Output dir
 target/
+
+# FreePascal
+src/**/backup/
+*.ppu
+src/lib/
+*.lpi
+*.lps

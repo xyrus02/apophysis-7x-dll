@@ -26,20 +26,13 @@ unit varJulia3Dz;
 interface
 
 uses
-{$ifdef Apo7X64}
-{$else}
-AsmRandom,
-{$endif}
   BaseVariation, XFormMan;
 
 const
   var_name = 'julia3Dz';
   var_n_name='julia3Dz_power';
 
-{$ifdef Apo7X64}
-{$else}
-  {$define _ASM_}
-{$endif}
+  //{$define _ASM_}
 
 type
   TVariationJulia3D = class(TBaseVariation)
@@ -69,7 +62,7 @@ type
 
     procedure Prepare; override;
     procedure CalcFunction; override;
-    procedure GetCalcFunction(var f: TCalcFunction); override;
+    procedure GetCalcFunction(var fun: TCalcFunction); override;
   end;
 
 implementation
@@ -93,13 +86,13 @@ begin
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
-procedure TVariationJulia3D.GetCalcFunction(var f: TCalcFunction);
+procedure TVariationJulia3D.GetCalcFunction(var fun: TCalcFunction);
 begin
-  if N = 2 then f := CalcPower2
-  else if N = -2 then f := CalcPowerMinus2
-  else if N = 1 then f := CalcPower1
-  else if N = -1 then f := CalcPowerMinus1
-  else f := CalcFunction;
+  if N = 2 then fun := @CalcPower2
+  else if N = -2 then fun := @CalcPowerMinus2
+  else if N = 1 then fun := @CalcPower1
+  else if N = -1 then fun := @CalcPowerMinus1
+  else fun := @CalcFunction;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////

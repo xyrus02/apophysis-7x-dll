@@ -2,14 +2,10 @@ unit ParameterIO;
 
 interface
   uses Global, SysUtils, StrUtils, ControlPoint, XForm, cmap,
-       XFormMan, RegularExpressionsCore, RegexHelper, Classes;
+       XFormMan, Classes, RegExpr, RegexHelper;
 
 function IsRegisteredVariation(name: string): boolean;
 function IsRegisteredVariable(name: string): boolean;
-
-procedure EnumParameters(xml: string; var list: TStringList); 
-function NameOf(xml: string): string;
-function FindFlameInBatch(xml, name: string): string;
 
 procedure LoadPaletteFromXmlCompatible(xml: Utf8String; var cp: TControlPoint);
 procedure LoadXFormFromXmlCompatible(xml: Utf8String; isFinalXForm: boolean; var xf: TXForm; var enabled: boolean);
@@ -52,54 +48,6 @@ begin
 end;
 
 (* ***************************** Loading functions ******************************* *)
-function NameOf(xml: string): string;
-var
-	Regex: TPerlRegEx;
-begin
-  Regex := TPerlRegEx.Create;
-  Regex.RegEx := '<flame.*?name="(.*?)".*?>.*?</flame>';
-  Regex.Options := [preSingleLine, preCaseless];
-  Regex.Subject := Utf8String(xml);
-  if Regex.Match then begin
-    Result := String(Regex.Groups[1]);
-  end else Result := '';
-  Regex.Free;
-end;
-procedure EnumParameters(xml: string; var list: TStringList);
-var
-	Regex: TPerlRegEx;
-begin
-  Regex := TPerlRegEx.Create;
-  Regex.RegEx := '<flame.*?>.*?</flame>';
-  Regex.Options := [preSingleLine, preCaseless];
-  Regex.Subject := Utf8String(xml);
-  if Regex.Match then begin
-  	repeat
-  		list.Add(String(Regex.MatchedText));
-  	until not Regex.MatchAgain;
-  end;
-  Regex.Free;
-end;
-function FindFlameInBatch(xml, name: string): string;
-var
-	Regex: TPerlRegEx;
-begin
-  Regex := TPerlRegEx.Create;
-  Regex.RegEx := '<flame.*?name="(.*?)".*?>.*?</flame>';
-  Regex.Options := [preSingleLine, preCaseless];
-  Regex.Subject := Utf8String(xml);
-  if Regex.Match then begin
-  	repeat
-      if (Utf8String(name) = Regex.Groups[1]) then begin
-        Result := String(Regex.MatchedText);
-        Regex.Free;
-        exit;
-      end;
-	  until not Regex.MatchAgain;
-  end;
-  Result := '';
-  Regex.Free;
-end;
 
 function LoadCpFromXmlCompatible(xml: string; var cp: TControlPoint; var statusOutput: string): boolean;
 const
@@ -116,21 +64,21 @@ var
   palette_attribs : Utf8String;
   palette_content : Utf8String;
 
-  find_attribs : TPerlRegEx;
+  find_attribs : TRegExpr;
   found_attrib : boolean;
   attrib_name  : Utf8String;
   attrib_match : Utf8String;
 
-  find_xforms : TPerlRegEx;
+  find_xforms : TRegExpr;
   found_xform : boolean;
   xform_index : integer;
 
-  find_strtokens : TPerlRegEx;
+  find_strtokens : TRegExpr;
   found_strtoken : boolean;
   strtoken_index : integer;
   strtoken_value : Utf8String;
 
-  find_palette : TPerlRegEx;
+  find_palette : TRegExpr;
 
   temp2i : T2Int;
   temp2f : T2Float;
@@ -140,32 +88,32 @@ var
   attrib_success: boolean;
   i: integer;
 begin
-  find_strtokens := TPerlRegEx.Create;
-  find_attribs := TPerlRegEx.Create;
-  find_xforms := TPerlRegEx.Create;
-  find_palette := TPerlRegEx.Create;
+  find_strtokens := TRegExpr.Create;
+  find_attribs := TRegExpr.Create;
+  find_xforms := TRegExpr.Create;
+  find_palette := TRegExpr.Create;
 
-  find_attribs.RegEx := Utf8String(re_attrib);
-  find_strtokens.RegEx := Utf8String(re_strtoken);
-  find_xforms.RegEx := Utf8String(re_xform);
-  find_palette.RegEx := Utf8String(re_palette);
+  find_attribs.Expression := Utf8String(re_attrib);
+  find_strtokens.Expression := Utf8String(re_strtoken);
+  find_xforms.Expression := Utf8String(re_xform);
+  find_palette.Expression := Utf8String(re_palette);
 
-  find_attribs.Options := [preSingleLine, preCaseless];
-  find_strtokens.Options := [preSingleLine, preCaseless];
-  find_xforms.Options := [preSingleLine, preCaseless];
-  find_palette.Options := [preSingleLine, preCaseless];
+  find_attribs.ModifierStr := 'si';
+  find_strtokens.ModifierStr := 'si';
+  find_xforms.ModifierStr := 'si';
+  find_palette.ModifierStr := 'si';
 
   flame_attribs := Utf8String(GetStringPart(xml, re_flame, 1, ''));
   flame_content := Utf8String(GetStringPart(xml, re_flame, 2, ''));
 
-  find_attribs.Subject := Utf8String(flame_attribs);
-  found_attrib := find_attribs.Match;
+  find_attribs.InputString := Utf8String(flame_attribs);
+  found_attrib := find_attribs.ExecNext;
 
   Result := true;
   
   while found_attrib do begin
-    attrib_match := find_attribs.MatchedText;
-    attrib_name := Utf8String(Lowercase(String(find_attribs.Groups[1])));
+    attrib_match := find_attribs.Match[0];
+    attrib_name := Utf8String(Lowercase(String(find_attribs.Match[1])));
     attrib_success := true;
 
     if attrib_name = 'name' then
@@ -240,15 +188,15 @@ begin
     else if attrib_name = 'soloxform' then
       cp.soloXform := GetIntPart(String(attrib_match), re_attrib, 2, 0);
 
-    found_attrib := find_attribs.MatchAgain;
+    found_attrib := find_attribs.ExecNext;
   end;
 
   if LimitVibrancy and (cp.vibrancy > 1) then
     cp.vibrancy := 1;
   cp.cmapindex := -1;
 
-  find_xforms.Subject := flame_content;
-  found_xform := find_xforms.Match;
+  find_xforms.InputString := flame_content;
+  found_xform := find_xforms.ExecNext;
   xform_index := 0;
   cp.finalXformEnabled := false;
 
@@ -256,27 +204,27 @@ begin
     cp.xform[i].density := 0;
 
   while found_xform do begin
-    xform_type := find_xforms.Groups[1];
-    xform_attribs := find_xforms.Groups[2];
+    xform_type := find_xforms.Match[1];
+    xform_attribs := find_xforms.Match[2];
     if (LowerCase(String(xform_type)) = 'xform') then begin
-      LoadXFormFromXmlCompatible(find_xforms.MatchedText,
+      LoadXFormFromXmlCompatible(find_xforms.Match[0],
         false, cp.xform[xform_index], cp.finalXformEnabled);
       xform_index := xform_index + 1;
     end else begin
       cp.finalXform := Txform.Create;
-      LoadXFormFromXmlCompatible(find_xforms.MatchedText,
+      LoadXFormFromXmlCompatible(find_xforms.Match[0],
         true, cp.finalXform, dummy);
       cp.finalXformEnabled := true;
       cp.useFinalXform := true;
       xform_index := xform_index + 1;
       cp.xform[cp.NumXForms] := cp.finalXform;
     end;
-    found_xform := find_xforms.MatchAgain;
+    found_xform := find_xforms.ExecNext;
   end;
 
-  find_palette.Subject := Utf8String(xml);
-  if (find_palette.Match) then
-    LoadPaletteFromXmlCompatible(find_palette.MatchedText, cp);
+  find_palette.InputString := Utf8String(xml);
+  if (find_palette.ExecNext) then
+    LoadPaletteFromXmlCompatible(find_palette.Match[0], cp);
 
   find_strtokens.Free;
   find_attribs.Free;
@@ -292,7 +240,7 @@ var
   data, attr, hexdata, format: string;
   alpha: boolean;
 
-  find_attribs : TPerlRegEx;
+  find_attribs : TRegExpr;
   found_attrib : boolean;
   attrib_name  : Utf8String;
   attrib_match : Utf8String;
@@ -311,17 +259,17 @@ begin
   hexdata := GetStringPart(String(xml), re_palette, 2, '');
   attr := GetStringPart(String(xml), re_palette, 1, '');
 
-  find_attribs := TPerlRegEx.Create;
-  find_attribs.RegEx := Utf8String(re_attrib);
-  find_attribs.Options := [preSingleLine, preCaseless];
-  find_attribs.Subject := Utf8String(attr);
-  found_attrib := find_attribs.Match;
+  find_attribs := TRegExpr.Create;
+  find_attribs.Expression := Utf8String(re_attrib);
+  find_attribs.ModifierStr := 'si';
+  find_attribs.InputString := Utf8String(attr);
+  found_attrib := find_attribs.ExecNext;
 
   count := 0;
   
   while found_attrib do begin
-    attrib_match := find_attribs.MatchedText;
-    attrib_name := Utf8String(Lowercase(String(find_attribs.Groups[1])));
+    attrib_match := find_attribs.Match[0];
+    attrib_name := Utf8String(Lowercase(String(find_attribs.Match[1])));
     attrib_success := true;
 
     if (attrib_name = 'count') then
@@ -329,7 +277,7 @@ begin
     else if (attrib_name = 'format') then
       format := GetStringPart(String(attrib_match), re_attrib, 2, 'RGB');
 
-    found_attrib := find_attribs.MatchAgain;
+    found_attrib := find_attribs.ExecNext;
   end;
 
   find_attribs.Free;
@@ -361,7 +309,7 @@ const
   re_coefs  : string = '([\d.eE+-]+)\s+([\d.eE+-]+)\s+([\d.eE+-]+)\s+([\d.eE+-]+)\s+([\d.eE+-]+)\s+([\d.eE+-]+)';
 var
   xform_attribs: string;
-  find_attribs : TPerlRegEx;
+  find_attribs : TRegExpr;
   found_attrib : boolean;
   attrib_name  : Utf8String;
   attrib_match : Utf8String;
@@ -375,18 +323,18 @@ begin
   enabled := true;
   xform_attribs := GetStringPart(String(xml), re_xform, 2, '');
 
-  find_attribs := TPerlRegEx.Create;
-  find_attribs.RegEx := Utf8String(re_attrib);
-  find_attribs.Options := [preSingleLine, preCaseless];
-  find_attribs.Subject := Utf8String(xform_attribs);
-  found_attrib := find_attribs.Match;
+  find_attribs := TRegExpr.Create;
+  find_attribs.Expression := Utf8String(re_attrib);
+  find_attribs.ModifierStr := 'si';
+  find_attribs.InputString := Utf8String(xform_attribs);
+  found_attrib := find_attribs.ExecNext;
 
   for i := 0 to NRVAR-1 do
     xf.SetVariation(i, 0);
   
   while found_attrib do begin
-    attrib_match := find_attribs.MatchedText;
-    attrib_name := (find_attribs.Groups[1]);
+    attrib_match := find_attribs.Match[0];
+    attrib_name := (find_attribs.Match[1]);
     attrib_success := true;
 
     if (attrib_name = 'enabled') and isFinalXform then
@@ -470,7 +418,7 @@ begin
       attrib_success := false;
     end;
 
-    found_attrib := find_attribs.MatchAgain;
+    found_attrib := find_attribs.ExecNext;
   end;
 
   if (isFinalXform) then begin

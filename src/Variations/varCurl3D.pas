@@ -63,7 +63,7 @@ type
 
     procedure Prepare; override;
     procedure CalcFunction; override;
-    procedure GetCalcFunction(var f: TCalcFunction); override;
+    procedure GetCalcFunction(var fun: TCalcFunction); override;
   end;
 
 implementation
@@ -103,7 +103,7 @@ begin
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
-procedure TVariationCurl3D.GetCalcFunction(var f: TCalcFunction);
+procedure TVariationCurl3D.GetCalcFunction(var fun: TCalcFunction);
 begin
 {
   if IsZero(cx) and IsZero(cy) and IsZero(cz) then f := CalcLinear
@@ -119,25 +119,25 @@ begin
   if IsZero(cx) then begin
     if IsZero(cy) then begin
       if IsZero(cz) then
-        f := CalcLinear
+        fun := @CalcLinear
       else
-        f := CalcCz;
+        fun := @CalcCz;
     end
     else begin
       if IsZero(cz) then
-        f := CalcCy
+        fun := @CalcCy
       else
-        f := CalcFunction;
+        fun := @CalcFunction;
     end
   end
   else begin
     if IsZero(cy) and IsZero(cz) then
-      f := CalcCx
+      fun := @CalcCx
     else
-      f := CalcFunction;
+      fun := @CalcFunction;
   end;
 
-  f := CalcFunction;
+  fun := @CalcFunction;
 
 end;
 

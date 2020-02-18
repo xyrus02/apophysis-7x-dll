@@ -26,7 +26,7 @@ interface
 
 uses
   Windows, Graphics, Classes, RenderingCommon, Logging,
-  Controlpoint, ImageMaker, PngImage, Translation;
+  Controlpoint, ImageMaker, Translation;
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -168,7 +168,6 @@ type
     
     function  GetImage: TBitmap; virtual;
     procedure GetImageAndDelete(target:tBitmap); virtual;
-    function  GetTransparentImage: TPngObject;
     procedure UpdateImage(CP: TControlPoint);
     procedure SaveImage(const FileName: String);
 
@@ -256,7 +255,6 @@ type
 
     function GetImage: TBitmap;
     procedure GetImageAndDelete(target: TBitmap);
-    function  GetTransparentImage: TPngObject;
     procedure Stop;
 
     procedure IntermediateSample(imgmkr: TImageMaker);
@@ -437,7 +435,7 @@ begin
 end;
 function TBaseRenderer.GetBucketsPtr: pointer;
 begin
-  Result := Buckets;
+  Result := @Buckets;
 end;
 
 constructor TBaseRenderer.Create;
@@ -616,17 +614,6 @@ end;
 procedure TRenderer.GetImageAndDelete(target:tBitmap);
 begin
   FRenderer.GetImageAndDelete(target);
-end;
-
-///////////////////////////////////////////////////////////////////////////////
-function TBaseRenderer.GetTransparentImage: TPngObject;
-begin
-  if FStop > 0 then begin
-    // shouldn't happen. and if it does...WTF?
-    Result := nil;
-  end
-  else
-    Result := FImageMaker.GetTransparentImage;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1043,11 +1030,6 @@ end;
 procedure TRenderer.Hibernate(fileName: string);
 begin
   FRenderer.Hibernate(fileName);
-end;
-
-function TRenderer.GetTransparentImage: TPngObject;
-begin
-  Result := FRenderer.GetTransparentImage;
 end;
 
 function TimeToString(t: TDateTime): string;

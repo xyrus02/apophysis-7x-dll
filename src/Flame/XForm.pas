@@ -30,23 +30,11 @@ unit XForm;
 interface
 
 uses
-{$ifdef Apo7X64}
-{$else}
-AsmRandom,
-{$endif}
   XFormMan, BaseVariation;
 
 const
   MAX_WEIGHT = 1000.0;
-  {$ifndef Light}
-    {$ifndef T500}
-    NXFORMS = 100;
-    {$else}
-    NXFORMS = 500;
-    {$endif}
-  {$else}
-    NXFORMS = 50;
-  {$endif}
+  NXFORMS = 100;
 
 type
   TCPpoint = record
@@ -65,10 +53,7 @@ type
 
   TMatrix = array[0..2, 0..2] of double;
 
-{$ifdef Apo7X64}
-{$else}
   //{$define _ASM_}
-{$endif}
 
 type
   TXForm = class
@@ -200,11 +185,11 @@ type
     procedure NextPoint(var CPpoint: TCPpoint);
     procedure NextPointTo(var CPpoint, ToPoint: TCPpoint);
     procedure NextPointXY(var px, py: double);
-    procedure NextPoint2C(var p: T2CPoint);
+    procedure NextPoint2C(var pp: T2CPoint);
 
     procedure Rotate(const degrees: double);
     procedure Translate(const x, y: double);
-    procedure Multiply(const a, b, c, d: double);
+    procedure Multiply(const a, b, cc, d: double);
     procedure Scale(const s: double);
 
     procedure GetVariable(const name: string; var Value: double);
@@ -352,11 +337,11 @@ begin
   if CalculateAngle or CalculateSinCos then
   begin
     if CalculateAngle and CalculateSinCos then
-      FCalcFunctionList[FNrFunctions] := PrecalcAll
+      FCalcFunctionList[FNrFunctions] := @PrecalcAll
     else if CalculateAngle then
-      FCalcFunctionList[FNrFunctions] := PrecalcAngle
+      FCalcFunctionList[FNrFunctions] := @PrecalcAngle
     else //if CalculateSinCos then
-      FCalcFunctionList[FNrFunctions] := PrecalcSinCos;
+      FCalcFunctionList[FNrFunctions] := @PrecalcSinCos;
     Inc(FNrFunctions);
   end;
 
@@ -419,7 +404,7 @@ begin
     p20 := p[2][0];
     p21 := p[2][1];
 
-    FCalcFunctionList[FNrFunctions] := DoPostTransform;
+    FCalcFunctionList[FNrFunctions] := @DoPostTransform;
     Inc(FNrFunctions);
   end;
 
@@ -470,7 +455,7 @@ begin
 
   FNrFunctions := 1;
   SetLength(FCalcFunctionList, 1);
-  FCalcFunctionList[0] := DoInvalidOperation;
+  FCalcFunctionList[0] := @DoInvalidOperation;
 end;
 
 procedure TXForm.PrecalcAngle;
@@ -1109,18 +1094,18 @@ begin
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
-procedure TXForm.NextPoint2C(var p: T2CPoint);
+procedure TXForm.NextPoint2C(var pp: T2CPoint);
 var
   i: Integer;
 begin
   // first compute the color coord
 //  pc1 := (pc1 + color) * 0.5 * (1 - symmetry) + symmetry * pc1;
 //  pc2 := (pc2 + color) * 0.5 * (1 - symmetry) + symmetry * pc2;
-  p.c1 := p.c1 * colorC1 + colorC2;
-  p.c2 := p.c2 * colorC1 + colorC2;
+  pp.c1 := pp.c1 * colorC1 + colorC2;
+  pp.c2 := pp.c2 * colorC1 + colorC2;
 
-  FTx := c00 * p.x + c10 * p.y + c20;
-  FTy := c01 * p.x + c11 * p.y + c21;
+  FTx := c00 * pp.x + c10 * pp.y + c20;
+  FTy := c01 * pp.x + c11 * pp.y + c21;
 
   Fpx := 0;
   Fpy := 0;
@@ -1128,8 +1113,8 @@ begin
   for i:= 0 to FNrFunctions-1 do
     FCalcFunctionList[i];
 
-  p.x := FPx;
-  p.y := FPy;
+  pp.x := FPx;
+  pp.y := FPy;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1233,14 +1218,14 @@ begin
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
-procedure TXForm.Multiply(const a, b, c, d: double);
+procedure TXForm.Multiply(const a, b, cc, d: double);
 var
   Matrix, M1: TMatrix;
 begin
   M1 := Identity;
   M1[0, 0] := a;
   M1[0, 1] := b;
-  M1[1, 0] := c;
+  M1[1, 0] := cc;
   M1[1, 1] := d;
   Matrix := Identity;
   Matrix[0][0] := Self.c[0, 0];
@@ -1302,38 +1287,38 @@ begin
   SetLength(FFunctionList, NrVar + Length(FRegVariations));
 
   //fixed
-  FFunctionList[0] := Linear3D;
-  FFunctionList[1] := Flatten;
-  FFunctionList[2] := Sinusoidal;
-  FFunctionList[3] := Spherical;
-  FFunctionList[4] := Swirl;
-  FFunctionList[5] := Horseshoe;
-  FFunctionList[6] := Polar;
-  FFunctionList[7] := Disc;
-  FFunctionList[8] := Spiral;
-  FFunctionList[9] := Hyperbolic;
-  FFunctionList[10] := Square;
-  FFunctionList[11] := Eyefish;
-  FFunctionList[12] := Bubble;
-  FFunctionList[13] := Cylinder;
-  FFunctionList[14] := Noise;
-  FFunctionList[15] := Blur;
-  FFunctionList[16] := Gaussian;
-  FFunctionList[17] := ZBlur;
-  FFunctionList[18] := Blur3D;
+  FFunctionList[0] := @Linear3D;
+  FFunctionList[1] := @Flatten;
+  FFunctionList[2] := @Sinusoidal;
+  FFunctionList[3] := @Spherical;
+  FFunctionList[4] := @Swirl;
+  FFunctionList[5] := @Horseshoe;
+  FFunctionList[6] := @Polar;
+  FFunctionList[7] := @Disc;
+  FFunctionList[8] := @Spiral;
+  FFunctionList[9] := @Hyperbolic;
+  FFunctionList[10] := @Square;
+  FFunctionList[11] := @Eyefish;
+  FFunctionList[12] := @Bubble;
+  FFunctionList[13] := @Cylinder;
+  FFunctionList[14] := @Noise;
+  FFunctionList[15] := @Blur;
+  FFunctionList[16] := @Gaussian;
+  FFunctionList[17] := @ZBlur;
+  FFunctionList[18] := @Blur3D;
 
-  FFunctionList[19] := PreBlur;
-  FFunctionList[20] := PreZScale;
-  FFunctionList[21] := PreZTranslate;
-  FFunctionList[22] := PreRotateX;
-  FFunctionList[23] := PreRotateY;
+  FFunctionList[19] := @PreBlur;
+  FFunctionList[20] := @PreZScale;
+  FFunctionList[21] := @PreZTranslate;
+  FFunctionList[22] := @PreRotateX;
+  FFunctionList[23] := @PreRotateY;
 
-  FFunctionList[24] := ZScale;
-  FFunctionList[25] := ZTranslate;
-  FFunctionList[26] := ZCone;
+  FFunctionList[24] := @ZScale;
+  FFunctionList[25] := @ZTranslate;
+  FFunctionList[26] := @ZCone;
 
-  FFunctionList[27] := PostRotateX;
-  FFunctionList[28] := PostRotateY;
+  FFunctionList[27] := @PostRotateX;
+  FFunctionList[28] := @PostRotateY;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////

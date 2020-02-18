@@ -64,15 +64,15 @@ begin
 end;
 procedure TVariationWedge.CalcFunction;
 var
-  r, a, cosa, sina: double;
-  c: integer;
+  r, ang, cosa, sina: double;
+  con: integer;
 begin
 
   r := sqrt(sqr(FTx^) + sqr(FTy^));
-  a := ArcTan2(FTy^, FTx^) + wedge_swirl * r;
-  c := floor((wedge_count * a + PI) * C1_2PI);
-  a := a * comp_fac + c * wedge_angle;
-  SinCos(a, sina, cosa);
+  ang := ArcTan2(FTy^, FTx^) + wedge_swirl * r;
+  con := floor((wedge_count * a + PI) * C1_2PI);
+  ang := ang * comp_fac + con * wedge_angle;
+  SinCos(ang, sina, cosa);
 
   r := vvar * (r + wedge_hole);
   FPx^ := FPx^ + r * cosa;

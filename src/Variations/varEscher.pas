@@ -31,7 +31,7 @@ uses
 type
   TVariationEscher = class(TBaseVariation)
   private
-    escher_beta, c, d: double;
+    escher_beta, con, dist: double;
   public
     constructor Create;
 
@@ -45,7 +45,7 @@ type
     function GetVariable(const Name: string; var value: double): boolean; override;
     function ResetVariable(const Name: string): boolean; override;
 
-	  procedure Prepare; override;
+    procedure Prepare; override;
     procedure CalcFunction; override;
   end;
 
@@ -57,20 +57,20 @@ uses
 ///////////////////////////////////////////////////////////////////////////////
 procedure TVariationEscher.Prepare;
 begin
-  sincos(escher_beta, d, c);
-  c := 0.5 * (1.0 + c);
-  d := 0.5 * d;
+  sincos(escher_beta, dist, con);
+  con := 0.5 * (1.0 + con);
+  dist := 0.5 * dist;
 end;
 
 procedure TVariationEscher.CalcFunction;
-var sn, cs, a, lnr, m : double;
+var sn, cs, ang, lnr, m : double;
 begin
-  a := arctan2(FTy^, FTx^); // Angular polar dimension
+  ang := arctan2(FTy^, FTx^); // Angular polar dimension
   lnr := 0.5 * ln(FTx^*FTx^ + FTy^*FTy^); // Natural logarithm of the radial polar dimension.
 
-  m := VVAR * exp(c * lnr - d * a);
+  m := VVAR * exp(con * lnr - dist * ang);
 
-    sincos(c * a + d * lnr, sn, cs);
+    sincos(con * ang + dist * lnr, sn, cs);
 
     FPx^ := FPx^ + m * cs;
     FPy^ := FPy^ + m * sn;

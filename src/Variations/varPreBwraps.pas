@@ -76,7 +76,7 @@ var
   Vx, Vy,
   Cx, Cy,
   Lx, Ly,
-  r, theta, s, c : double;
+  r, theta, sin, cos : double;
 begin
   Vx := FTx^;
   Vy := FTy^;
@@ -86,8 +86,8 @@ begin
     Cx := (floor(Vx / pre_bwraps_cellsize) + 0.5) * pre_bwraps_cellsize;
     Cy := (floor(Vy / pre_bwraps_cellsize) + 0.5) * pre_bwraps_cellsize;
 
-	  Lx := Vx - Cx;
-	  Ly := Vy - Cy;
+    Lx := Vx - Cx;
+    Ly := Vy - Cy;
 
     if ((sqr(Lx) + sqr(Ly)) <= r2) then
     begin
@@ -101,10 +101,10 @@ begin
 
       r := (sqr(Lx) + sqr(Ly)) / r2;
       theta := pre_bwraps_inner_twist * (1.0 - r) + pre_bwraps_outer_twist * r;
-      SinCos(theta, s, c);
+      SinCos(theta, sin, cos);
 
-      Vx := Cx + c * Lx + s * Ly;
-      Vy := Cy - s * Lx + c * Ly;
+      Vx := Cx + cos * Lx + sin * Ly;
+      Vy := Cy - sin * Lx + cos * Ly;
 
       FTx^ := VVAR * Vx;
       FTy^ := VVAR * Vy;

@@ -67,7 +67,7 @@ type
     procedure CalcFunction; override;
     procedure CalcFunctionRadial;
     procedure CalcFunctionGaussian;
-    procedure GetCalcFunction(var f: TCalcFunction); override;
+    procedure GetCalcFunction(var fun: TCalcFunction); override;
   end;
 
 implementation
@@ -81,32 +81,32 @@ begin
   rmax := 0.04 * scatter;
 end;
 
-procedure TVariationPreFalloff2.GetCalcFunction(var f: TCalcFunction);
+procedure TVariationPreFalloff2.GetCalcFunction(var fun: TCalcFunction);
 begin
-  if blurtype = 1 then f := CalcFunctionRadial
-  else if blurtype = 2 then f := CalcFunctionGaussian
-  else f := CalcFunction;
+  if blurtype = 1 then fun := @CalcFunctionRadial
+  else if blurtype = 2 then fun := @CalcFunctionGaussian
+  else fun := @CalcFunction;
 end;
 procedure TVariationPreFalloff2.CalcFunction;
 var
-  in_x, in_y, in_z, d: double;
+  in_x, in_y, in_z, dist: double;
 begin
   in_x := FTx^;
   in_y := FTy^;
   in_z := FTz^;
 
-  d := sqrt(sqr(in_x - x0) + sqr(in_y - y0) + sqr(in_z - z0));
-  if (invert <> 0) then d := 1 - d; if (d < 0) then d := 0;
-  d := (d - mindist) * rmax; if (d < 0) then d := 0;
+  dist := sqrt(sqr(in_x - x0) + sqr(in_y - y0) + sqr(in_z - z0));
+  if (invert <> 0) then dist := 1 - dist; if (dist < 0) then dist := 0;
+  dist := (dist - mindist) * rmax; if (dist < 0) then dist := 0;
 
-  FTx^ := VVAR * (in_x + mul_x * random * d);
-  FTy^ := VVAR * (in_y + mul_y * random * d);
-  FTz^ := VVAR * (in_z + mul_z * random * d);
-  color^ := Abs(Frac(color^ + mul_c * random * d));
+  FTx^ := VVAR * (in_x + mul_x * random * dist);
+  FTy^ := VVAR * (in_y + mul_y * random * dist);
+  FTz^ := VVAR * (in_z + mul_z * random * dist);
+  color^ := Abs(Frac(color^ + mul_c * random * dist));
 end;
 procedure TVariationPreFalloff2.CalcFunctionRadial;
 var
-  in_x, in_y, in_z, d, r_in: double;
+  in_x, in_y, in_z, dist, r_in: double;
   sigma, phi, r, sins, coss, sinp, cosp: double;
 begin
   in_x := FTx^;
@@ -114,13 +114,13 @@ begin
   in_z := FTz^;
 
   r_in := sqrt(sqr(in_x) + sqr(in_y) + sqr(in_z)) + 1e-6;
-  d := sqrt(sqr(in_x - x0) + sqr(in_y - y0) + sqr(in_z - z0));
-  if (invert <> 0) then d := 1 - d; if (d < 0) then d := 0;
-  d := (d - mindist) * rmax; if (d < 0) then d := 0;
+  dist := sqrt(sqr(in_x - x0) + sqr(in_y - y0) + sqr(in_z - z0));
+  if (invert <> 0) then dist := 1 - dist; if (dist < 0) then dist := 0;
+  dist := (dist - mindist) * rmax; if (dist < 0) then dist := 0;
 
-  sigma := ArcSin(in_z / r_in) + mul_z * random * d;
-  phi := ArcTan2(in_y, in_x) + mul_y * random * d;
-  r := r_in + mul_x * random * d;
+  sigma := ArcSin(in_z / r_in) + mul_z * random * dist;
+  phi := ArcTan2(in_y, in_x) + mul_y * random * dist;
+  r := r_in + mul_x * random * dist;
 
   SinCos(sigma, sins, coss);
   SinCos(phi, sinp, cosp);
@@ -128,24 +128,24 @@ begin
   FTx^ := VVAR * (r * coss * cosp);
   FTy^ := VVAR * (r * coss * sinp);
   FTz^ := VVAR * (sins);
-  color^ := Abs(Frac(color^ + mul_c * random * d));
+  color^ := Abs(Frac(color^ + mul_c * random * dist));
 end;
 procedure TVariationPreFalloff2.CalcFunctionGaussian;
 var
-  in_x, in_y, in_z, d: double;
+  in_x, in_y, in_z, dist: double;
   sigma, phi, r, sins, coss, sinp, cosp: double;
 begin
   in_x := FTx^;
   in_y := FTy^;
   in_z := FTz^;
 
-  d := sqrt(sqr(in_x - x0) + sqr(in_y - y0) + sqr(in_z - z0));
-  if (invert <> 0) then d := 1 - d; if (d < 0) then d := 0;
-  d := (d - mindist) * rmax; if (d < 0) then d := 0;
+  dist := sqrt(sqr(in_x - x0) + sqr(in_y - y0) + sqr(in_z - z0));
+  if (invert <> 0) then dist := 1 - dist; if (dist < 0) then dist := 0;
+  dist := (dist - mindist) * rmax; if (dist < 0) then dist := 0;
 
-  sigma := d * random * 2 * PI;
-  phi := d * random * PI;
-  r := d * random;
+  sigma := dist * random * 2 * PI;
+  phi := dist * random * PI;
+  r := dist * random;
 
   SinCos(sigma, sins, coss);
   SinCos(phi, sinp, cosp);
@@ -153,7 +153,7 @@ begin
   FTx^ := VVAR * (in_x + mul_x * r * coss * cosp);
   FTy^ := VVAR * (in_y + mul_y * r * coss * sinp);
   FTz^ := VVAR * (in_z + mul_z * r * sins);
-  color^ := Abs(Frac(color^ + mul_c * random * d));
+  color^ := Abs(Frac(color^ + mul_c * random * dist));
 end;
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -77,7 +77,7 @@ var
   Vx, Vy,
   Cx, Cy,
   Lx, Ly,
-  r, theta, s, c : double;
+  r, theta, s, con : double;
 begin
   Vx := FTx^;
   Vy := FTy^;
@@ -112,10 +112,10 @@ begin
 
       r := (sqr(Lx) + sqr(Ly)) / r2;
       theta := bwraps_inner_twist * (1.0 - r) + bwraps_outer_twist * r;
-      SinCos(theta, s, c);
+      SinCos(theta, s, con);
 
-      Vx := Cx + c * Lx + s * Ly;
-      Vy := Cy - s * Lx + c * Ly;
+      Vx := Cx + con * Lx + s * Ly;
+      Vy := Cy - s * Lx + con * Ly;
 
       FPx^ := FPx^ + VVAR * Vx;
       FPy^ := FPy^ + VVAR * Vy;

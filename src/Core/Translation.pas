@@ -2,11 +2,8 @@
 
 interface
 
-uses Global, Classes, Forms, LibXmlParser, LibXmlComps, SysUtils, RegexHelper;
+uses Global, Classes, Forms, LibXmlParser, LibXmlComps, SysUtils;
 
-procedure ListLanguages;
-procedure LanguageInfo(path: string; var name, localName: string);
-function LanguageAuthor(path: string): string;
 procedure Add(key, value: string);
 procedure LoadLanguage(path:string);
 procedure LoadEnglish();
@@ -41,50 +38,6 @@ var
   parser: TParser;
 
 implementation
-
-procedure ListLanguages;
-var
-  searchResult: TSearchRec;
-begin
-  if FindFirst(ExtractFilePath(Application.ExeName) + 'Languages\*.xml', faAnyFile, searchResult) = 0 then
-  begin
-    repeat
-      AvailableLanguages.Add(ExtractFilePath(Application.ExeName) + 'Languages\' + searchResult.Name);
-    until (FindNext(searchResult) <> 0);
-    SysUtils.FindClose(searchResult);
-  end;
-end;
-
-procedure LanguageInfo(path: string; var name, localName: string);
-const
-  exp1 = '\stitle="([^"]*)"';
-  exp2 = '\slocalized-title="([^"]*)"';
-var
-  langxml : string;
-  sl: TStringList;
-begin
-  sl := TStringList.Create;
-  sl.LoadFromFile(path);
-  langxml := sl.Text;
-  sl.Destroy;
-
-  name := GetStringPart(langxml, exp1, 1, '');
-  localname := GetStringPart(langxml, exp2, 1, '');
-end;
-function LanguageAuthor(path: string): string;
-const
-  exp = '\sauthor="([^"]*)"';
-var
-  langxml : string;
-  sl: TStringList;
-begin
-  sl := TStringList.Create;
-  sl.LoadFromFile(path);
-  langxml := sl.Text;
-  sl.Destroy;
-
-  Result := GetStringPart(langxml, exp, 1, '');
-end;
 
 procedure LoadEnglish();
 begin
@@ -680,10 +633,10 @@ begin
       parser := TParser.Create;
       ListXmlScanner := TEasyXmlScanner.Create(nil);
 
-      ListXmlScanner.OnStartTag := parser.ListXmlScannerStartTag;
-      ListXmlScanner.OnEndTag := parser.ListXmlScannerEndTag;
-      ListXmlScanner.OnEmptyTag := parser.ListXmlScannerEmptyTag;
-      ListXmlScanner.OnContent := parser.ListXmlScannerContent;
+      ListXmlScanner.OnStartTag := @parser.ListXmlScannerStartTag;
+      ListXmlScanner.OnEndTag := @parser.ListXmlScannerEndTag;
+      ListXmlScanner.OnEmptyTag := @parser.ListXmlScannerEmptyTag;
+      ListXmlScanner.OnContent := @parser.ListXmlScannerContent;
 
       ListXmlScanner.Filename := path;
       ListXmlScanner.Execute;

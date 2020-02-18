@@ -174,7 +174,7 @@ type
 
     procedure SaveToStringlist(sl: TStringlist);
     procedure SaveToFile(Filename: string);
-    procedure SaveToBinary(const handle: File);
+    procedure SaveToBinary(var handle: File);
 
     procedure ParseString(aString: string);
     procedure ParseStringList(sl: TStringlist);
@@ -482,17 +482,17 @@ begin
 
   if (CameraDOF <> 0) then begin
     if (CameraYaw <> 0) then
-      ProjectionFunc := ProjectPitchYawDOF
+      ProjectionFunc := @ProjectPitchYawDOF
     else
-      ProjectionFunc := ProjectPitchDOF;
+      ProjectionFunc := @ProjectPitchDOF;
   end
   else if (CameraPitch <> 0) or (CameraYaw <> 0) then begin
     if (CameraYaw <> 0) then
-      ProjectionFunc := ProjectPitchYaw
+      ProjectionFunc := @ProjectPitchYaw
     else
-      ProjectionFunc := ProjectPitch;
+      ProjectionFunc := @ProjectPitch;
   end
-  else ProjectionFunc := ProjectNone;
+  else ProjectionFunc := @ProjectNone;
 end;
 
 procedure TControlPoint.IterateXY(NrPoints: integer; var Points: TPointsXYArray);
@@ -535,8 +535,8 @@ begin
         if (xf.transOpacity = 0) then
           pPoint^.x := MaxDouble // hack
         else begin
-          pPoint.X := px;
-          pPoint.Y := py;
+          pPoint^.X := px;
+          pPoint^.Y := py;
         end;
         Inc(pPoint);
       end;
@@ -854,8 +854,8 @@ begin
     for i := 0 to n-1 do begin
       xf := xf.PropTable[Random(PROP_TABLE_SIZE)];
       xf.NextPointXY(px,py);
-      CurrentPoint.X := px;
-      CurrentPoint.Y := py;
+      CurrentPoint^.X := px;
+      CurrentPoint^.Y := py;
       Inc(CurrentPoint);
       // random CPs don't use finalXform...
     end;
@@ -1954,7 +1954,7 @@ begin
   FormatSettings.DecimalSeparator := OldDecimalSperator;
 end;
 
-procedure WriteDoubles(const handle: File; data: array of double);
+procedure WriteDoubles(var handle: File; data: array of double);
 var
   block: TBlock;
   i: integer;
@@ -1965,7 +1965,7 @@ begin
     BlockWrite(handle, block, 1);
   end;
 end;
-procedure WriteString(const handle: File; data: string);
+procedure WriteString(var handle: File; data: string);
 var
   k, l, size, chunks: Integer;
   raw : THibRawString;
@@ -2033,7 +2033,7 @@ begin
     Min(cp.NumXForms+1, NXFORMS);  *)
 end;
 
-procedure TControlPoint.SaveToBinary(const handle: File);
+procedure TControlPoint.SaveToBinary(var handle: File);
 var
   i, j, nvariations, nvariables, nchaos: Integer;
   v: double;
@@ -2506,15 +2506,15 @@ end;
 procedure TControlPoint.MoveRect(R: TSRect);
 var
   scale: double;
-  ppux, ppuy: double;
+  lppux, lppuy: double;
   dx,dy: double;
 begin
   scale := power(2, zoom);
-  ppux := pixels_per_unit * scale;
-  ppuy := pixels_per_unit * scale;
+  lppux := pixels_per_unit * scale;
+  lppuy := pixels_per_unit * scale;
 
-  dx := (r.Left - r.Right)/ppux;
-  dy := (r.Top - r.Bottom)/ppuy;
+  dx := (r.Left - r.Right)/lppux;
+  dy := (r.Top - r.Bottom)/lppuy;
 
   center[0] := center[0] + cos(FAngle) * dx - sin(FAngle) * dy;
   center[1] := center[1] + sin(FAngle) * dx + cos(FAngle) * dy ;

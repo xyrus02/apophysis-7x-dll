@@ -66,7 +66,7 @@ type
 
     procedure Prepare; override;
     procedure CalcFunction; override;
-    procedure GetCalcFunction(var f: TCalcFunction); override;
+    procedure GetCalcFunction(var fun: TCalcFunction); override;
   end;
 
 implementation
@@ -98,19 +98,19 @@ begin
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
-procedure TVariationCurl.GetCalcFunction(var f: TCalcFunction);
+procedure TVariationCurl.GetCalcFunction(var fun: TCalcFunction);
 begin
   if IsZero(c1) then begin
     if IsZero(c2) then
-      f := CalcZeroC2C1
+      fun := @CalcZeroC2C1
     else
-      f := CalcZeroC1
+      fun := @CalcZeroC1
   end
   else begin
     if IsZero(c2) then
-      f := CalcZeroC2
+      fun := @CalcZeroC2
     else
-      f := CalcFunction
+      fun := @CalcFunction
   end;
 end;
 

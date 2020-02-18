@@ -26,7 +26,7 @@ unit ImageMaker;
 interface
 
 uses
-  Windows, Graphics, ControlPoint, RenderingCommon, PngImage, Bezier;
+  Windows, Graphics, ControlPoint, RenderingCommon, Bezier;
 
 type TPalette = record
     logpal : TLogPalette;
@@ -73,7 +73,6 @@ type
 
     function GetImage: TBitmap;
     procedure GetImageAndDelete(target:tBitmap);
-    function GetTransparentImage: TPNGObject;
 
     procedure SetCP(CP: TControlPoint);
     procedure Init;
@@ -94,7 +93,7 @@ type
 implementation
 
 uses
-  Math, SysUtils, JPEG, Global, Types;
+  Math, SysUtils, Global, Types;
 
 { TImageMaker }
 
@@ -352,7 +351,7 @@ begin
   FBucketWidth := BucketWidth;
   FBucketHeight := BucketHeight;
 
-  FGetBucket := GetBucket;
+  FGetBucket := @GetBucket;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -398,7 +397,7 @@ var
   avg, fac: double;
   curvesSet: boolean;
 
-  GetBucket: function(x, y: integer): TBucket of object;
+  GetBucketFunc: function(x, y: integer): TBucket of object;
   bucket: TBucket;
   bx, by: integer;
   label zero_alpha;
@@ -439,9 +438,9 @@ begin
   gutter_width := FBucketwidth - FOversample * fcp.Width;
 //  gutter_width := 2 * ((25 - Foversample) div 2);
   if(FFilterSize <= gutter_width div 2) then // filter too big when 'post-processing' ?
-    GetBucket := FGetBucket
+    GetBucketFunc := FGetBucket
   else
-    GetBucket := SafeGetBucket;
+    GetBucketFunc := @SafeGetBucket;
 
   FBitmap.PixelFormat := pf24bit;
 
@@ -491,7 +490,7 @@ begin
           for jj := 0 to FFilterSize - 1 do begin
             filterValue := FFilter[ii, jj];
 
-            bucket := GetBucket(bx + jj, by + ii);
+            bucket := GetBucketFunc(bx + jj, by + ii);
             if bucket.count < 1024 then
               ls := lsa[Round(bucket.Count)]
             else
@@ -509,7 +508,7 @@ begin
         fp[2] := fp[2] / PREFILTER_WHITE;
         fp[3] := fcp.white_level * fp[3] / PREFILTER_WHITE;
       end else begin
-        bucket := GetBucket(bx, by);
+        bucket := GetBucketFunc(bx, by);
         if bucket.count < 1024 then
           ls := lsa[Round(bucket.count)] / PREFILTER_WHITE
         else
@@ -604,8 +603,8 @@ begin
         end
         else begin
 zero_alpha:
-          Row[j] := zero_BG;
-          AlphaRow[j] := 0;
+          Row^[j] := zero_BG;
+          AlphaRow^[j] := 0;
           continue;
         end;
 
@@ -637,10 +636,10 @@ zero_alpha:
         if (bi < 0) then bi := 0
         else if (bi > 255) then bi := 255;
 
-        Row[j].red := ri;
-        Row[j].green := gi;
-        Row[j].blue := bi;
-        AlphaRow[j] := ai;
+        Row^[j].red := ri;
+        Row^[j].green := gi;
+        Row^[j].blue := bi;
+        AlphaRow^[j] := ai;
       end
       else begin // ------------------------------------------- No transparency
         if (fp[3] > 0.0) then begin
@@ -660,7 +659,7 @@ zero_alpha:
         end
         else begin
           // no intensity so simply set the BG;
-          Row[j] := bgtot;
+          Row^[j] := bgtot;
           continue;
         end;
 
@@ -691,10 +690,10 @@ zero_alpha:
         if (bi < 0) then bi := 0
         else if (bi > 255) then bi := 255;
 
-        Row[j].red := ri;
-        Row[j].green := gi;
-        Row[j].blue := bi;
-        AlphaRow[j] := ai;//?
+        Row^[j].red := ri;
+        Row^[j].green := gi;
+        Row^[j].blue := bi;
+        AlphaRow^[j] := ai;//?
       end
     end;
 
@@ -712,89 +711,13 @@ end;
 procedure TImageMaker.SaveImage(FileName: String);
 var
   i,row: integer;
-  PngObject: TPngObject;
-  rowbm, rowpng: PByteArray;
-  JPEGImage: TJPEGImage;
-  PNGerror: boolean;
-  label BMPhack;
+  rowbm: PByteArray;
 begin
-  if UpperCase(ExtractFileExt(FileName)) = '.PNG' then begin
-    pngError := false;
-
-    PngObject := TPngObject.Create;
-    try
-      PngObject.Assign(FBitmap);
-      if fcp.Transparency then // PNGTransparency <> 0
-      begin
-        PngObject.CreateAlpha;
-        for i:= 0 to FAlphaBitmap.Height - 1 do begin
-          rowbm := PByteArray(FAlphaBitmap.scanline[i]);
-          rowpng := PByteArray(PngObject.AlphaScanline[i]);
-          for row := 0 to FAlphaBitmap.Width -1 do begin
-            rowpng[row] := rowbm[row];
-          end;
-        end;
-      end;
-      //else Exception.CreateFmt('Unexpected value of PNGTransparency [%d]', [PNGTransparency]);
-
-      {if (FParameters <> '') then
-        PngObject.AddtEXt('Parameters', FParameters); }
-      PngObject.SaveToFile(FileName);
-    except
-      pngError := true;
-    end;
-    PngObject.Free;
-
-    if pngError then begin
-      FileName := ChangeFileExt(FileName, '.bmp');
-      goto BMPHack;
-    end;
-
-  end else if UpperCase(ExtractFileExt(FileName)) = '.JPG' then begin
-    JPEGImage := TJPEGImage.Create;
-    JPEGImage.Assign(FBitmap);
-    JPEGImage.CompressionQuality := JPEGQuality;
-    JPEGImage.SaveToFile(FileName);
-    JPEGImage.Free;
-
-//    with TLinearBitmap.Create do
-//    try
-//      Assign(Renderer.GetImage);
-//      JPEGLoader.Default.Quality := JPEGQuality;
-//      SaveToFile(RenderForm.FileName);
-//    finally
-//      Free;
-//    end;
-  end else begin // bitmap
-BMPHack:
-    FBitmap.SaveToFile(FileName);
-    if fcp.Transparency then begin
-      FAlphaBitmap.Palette := CreatePalette(AlphaPalette.logpal);
-      FileName := ChangeFileExt(FileName, '_alpha.bmp');
-      FAlphaBitmap.SaveToFile(FileName);
-    end;
-  end;
-end;
-
-///////////////////////////////////////////////////////////////////////////////
-function TImageMaker.GetTransparentImage: TPngObject;
-var
-  x, y: integer;
-  i, row: integer;
-  rowbm, rowpng: PByteArray;
-begin
-  Result := TPngObject.Create;
-  Result.Assign(FBitmap);
-
+  FBitmap.SaveToFile(FileName);
   if fcp.Transparency then begin
-    Result.CreateAlpha;
-    for i:= 0 to FAlphaBitmap.Height - 1 do begin
-      rowbm := PByteArray(FAlphaBitmap.scanline[i]);
-      rowpng := PByteArray(Result.AlphaScanline[i]);
-      for row := 0 to FAlphaBitmap.Width - 1 do begin
-        rowpng[row] := rowbm[row];
-      end;
-    end;
+    FAlphaBitmap.Palette := CreatePalette(AlphaPalette.logpal);
+    FileName := ChangeFileExt(FileName, '_alpha.bmp');
+    FAlphaBitmap.SaveToFile(FileName);
   end;
 end;
 

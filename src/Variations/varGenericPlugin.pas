@@ -106,7 +106,6 @@ type
     PluginData : TPluginData;
   end;
 
-procedure InitializePlugins(pluginpath: string);
 procedure InitializePlugin(pluginpath, filename: string);
   //////////////////////////////////////////////////////////////////////
 
@@ -148,7 +147,7 @@ end;
 
 function TVariationPluginLoader.GetNrVariables: integer;
 begin
-  Result := PluginData.PluginVarGetNrVariables;
+  Result := PluginData.PluginVarGetNrVariables();
 end;
 
 function TVariationPluginLoader.GetVariableNameAt(const Index: integer): string;
@@ -206,7 +205,7 @@ end;
 ///////////////////////////////////////////////////////////////////////////////
 function TPluginVariation.GetNrVariables: integer;
 begin
-  Result := PluginData.PluginVarGetNrVariables;
+  Result := PluginData.PluginVarGetNrVariables();
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -251,8 +250,8 @@ begin
   with PluginData do begin
     PluginHandle := LoadLibrary(PChar(pluginpath + '\' + filename));
     if PluginHandle<>0 then begin
-  	  @PluginVarGetName := GetProcAddress(PluginHandle,'PluginVarGetName');
-  	  if @PluginVarGetName = nil then begin  // Must not be a valid plugin!
+  	  Pointer(PluginVarGetName) := GetProcAddress(PluginHandle,'PluginVarGetName');
+  	  if PluginVarGetName = nil then begin  // Must not be a valid plugin!
   		  FreeLibrary(PluginHandle);
   		  msg := 'Invalid plugin type: "' + filename + '" is not a plugin';
         {$ifdef Apo7XDLL}
@@ -263,7 +262,7 @@ begin
   		  Exit;
   	  end;
 
-      name := PluginVarGetName;
+      name := PluginVarGetName();
       if GetVariationIndex(name) >= 0 then begin
         FreeLibrary(PluginHandle);
         msg := 'Cannot load plugin from ' + filename + ': variation "' + name + '" already exists!';
@@ -273,18 +272,18 @@ begin
         pluginError := pluginError + msg + #13#10;
         {$endif}
       end else begin
-        @PluginVarGetNrVariables    := GetProcAddress(PluginHandle,'PluginVarGetNrVariables');
-        @PluginVarGetVariableNameAt := GetProcAddress(PluginHandle,'PluginVarGetVariableNameAt');
-      	@PluginVarCreate            := GetProcAddress(PluginHandle,'PluginVarCreate');
-      	@PluginVarDestroy           := GetProcAddress(PluginHandle,'PluginVarDestroy');
-      	@PluginVarInit              := GetProcAddress(PluginHandle,'PluginVarInit');
-      	@PluginVarInit3D            := GetProcAddress(PluginHandle,'PluginVarInit3D');
-      	@PluginVarInitDC            := GetProcAddress(PluginHandle,'PluginVarInitDC');
-      	@PluginVarPrepare           := GetProcAddress(PluginHandle,'PluginVarPrepare');
-      	@PluginVarCalc              := GetProcAddress(PluginHandle,'PluginVarCalc');
-      	@PluginVarGetVariable       := GetProcAddress(PluginHandle,'PluginVarGetVariable');
-      	@PluginVarSetVariable       := GetProcAddress(PluginHandle,'PluginVarSetVariable');
-      	@PluginVarResetVariable     := GetProcAddress(PluginHandle,'PluginVarResetVariable');
+        Pointer(PluginVarGetNrVariables)    := GetProcAddress(PluginHandle,'PluginVarGetNrVariables');
+        Pointer(PluginVarGetVariableNameAt) := GetProcAddress(PluginHandle,'PluginVarGetVariableNameAt');
+      	Pointer(PluginVarCreate)            := GetProcAddress(PluginHandle,'PluginVarCreate');
+      	Pointer(PluginVarDestroy)           := GetProcAddress(PluginHandle,'PluginVarDestroy');
+      	Pointer(PluginVarInit)              := GetProcAddress(PluginHandle,'PluginVarInit');
+      	Pointer(PluginVarInit3D)            := GetProcAddress(PluginHandle,'PluginVarInit3D');
+      	Pointer(PluginVarInitDC)            := GetProcAddress(PluginHandle,'PluginVarInitDC');
+      	Pointer(PluginVarPrepare)           := GetProcAddress(PluginHandle,'PluginVarPrepare');
+      	Pointer(PluginVarCalc)              := GetProcAddress(PluginHandle,'PluginVarCalc');
+      	Pointer(PluginVarGetVariable)       := GetProcAddress(PluginHandle,'PluginVarGetVariable');
+      	Pointer(PluginVarSetVariable)       := GetProcAddress(PluginHandle,'PluginVarSetVariable');
+      	Pointer(PluginVarResetVariable)     := GetProcAddress(PluginHandle,'PluginVarResetVariable');
       	RegisterVariation(TVariationPluginLoader.Create(PluginData), @PluginVarInit3D <> nil, @PluginVarInitDC <> nil);
         RegisterVariationFile(pluginpath + '\' + filename, name);
         {$ifdef Apo7XDLL}

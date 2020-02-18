@@ -47,7 +47,7 @@ type
     function SetVariable(const Name: string; var value: double): boolean; override;
     function GetVariable(const Name: string; var value: double): boolean; override;
 
-    procedure GetCalcFunction(var f: TCalcFunction); override;
+    procedure GetCalcFunction(var fun: TCalcFunction); override;
     procedure CalcFunction; override;
     procedure CalcZeroX;
     procedure CalcZeroY;
@@ -64,17 +64,17 @@ uses
 
 ///////////////////////////////////////////////////////////////////////////////
 
-procedure TVariationRectangles.GetCalcFunction(var f: TCalcFunction);
+procedure TVariationRectangles.GetCalcFunction(var fun: TCalcFunction);
 begin
   if IsZero(FRectanglesX) then begin
     if IsZero(FRectanglesY) then
-      f := CalcZeroXY
+      fun := @CalcZeroXY
     else
-      f := CalcZeroX;
+      fun := @CalcZeroX;
   end
   else if IsZero(FRectanglesY) then
-    f := CalcZeroY
-  else f := CalcFunction;
+    fun := @CalcZeroY
+  else fun := @CalcFunction;
 end;
 
 procedure TVariationRectangles.CalcFunction;

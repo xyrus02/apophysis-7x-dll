@@ -68,7 +68,7 @@ end;
 
 procedure TVariationFan2.CalcFunction;
 var
-  r, a : double;
+  r, ang : double;
   sinr, cosr: double;
   Angle: double;
 begin
@@ -94,10 +94,10 @@ begin
 }
   Angle := arctan2(FTx^, FTy^);
   if System.Frac((Angle + dy)/dx) > 0.5 then
-    a := Angle - dx2
+    ang := Angle - dx2
   else
-    a := Angle + dx2;
-  SinCos(a, sinr, cosr);
+    ang := Angle + dx2;
+  SinCos(ang, sinr, cosr);
   r := vvar * sqrt(sqr(FTx^) + sqr(FTy^));
   FPx^ := FPx^ + r * cosr;
   FPy^ := FPy^ + r * sinr;

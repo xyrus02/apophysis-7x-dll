@@ -1,7 +1,7 @@
 unit RegexHelper;
 
 interface
-  uses Global, SysUtils, StrUtils, RegularExpressionsCore;
+  uses Global, SysUtils, StrUtils, RegExpr;
 
   type T2Int = record
     i1, i2: integer;
@@ -25,15 +25,15 @@ implementation
 
 (* ***************************** Extract functions ******************************* *)
 function GetStringPart(text, expression: string; group: integer; def: string): string;
-var Regex: TPerlRegEx;
+var Regex: TRegExpr;
 begin
-  Regex := TPerlRegEx.Create;
-  Regex.RegEx := Utf8String(expression);
-  Regex.Options := [preSingleLine, preCaseless];
-  Regex.Subject := Utf8String(text);
+  Regex := TRegExpr.Create;
+  Regex.Expression := Utf8String(expression);
+  Regex.ModifierStr := 'si';
+  Regex.InputString := Utf8String(text);
 
-  if Regex.Match and (Regex.GroupCount >= group) then
-    Result := String(Regex.Groups[group])
+  if Regex.ExecNext and (Regex.SubExprMatchCount >= group) then
+    Result := String(Regex.Match[group])
   else Result := def;
 
   Regex.Free;

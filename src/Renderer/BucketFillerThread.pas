@@ -81,7 +81,7 @@ procedure TBucketFillerThread.Execute;
 var
   bc: integer;
 begin
-  inherited;
+
   //RenderForm.Output.Lines.Add(' . . . > Filler thread #' + IntToStr(ThreadID) + ' Started');
 
   bc := 0;

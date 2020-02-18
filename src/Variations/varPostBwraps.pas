@@ -77,18 +77,18 @@ var
   Vx, Vy,
   Cx, Cy,
   Lx, Ly,
-  r, theta, s, c : double;
+  r, theta, sin, cos : double;
 begin
   Vx := FPx^;
   Vy := FPy^;
 
-	if (post_bwraps_cellsize <> 0.0) then
+  if (post_bwraps_cellsize <> 0.0) then
   begin
     Cx := (floor(Vx / post_bwraps_cellsize) + 0.5) * post_bwraps_cellsize;
     Cy := (floor(Vy / post_bwraps_cellsize) + 0.5) * post_bwraps_cellsize;
 
-	  Lx := Vx - Cx;
-	  Ly := Vy - Cy;
+    Lx := Vx - Cx;
+    Ly := Vy - Cy;
 
     if ((sqr(Lx) + sqr(Ly)) <= r2) then
     begin
@@ -102,10 +102,10 @@ begin
 
       r := (sqr(Lx) + sqr(Ly)) / r2;
       theta := post_bwraps_inner_twist * (1.0 - r) + post_bwraps_outer_twist * r;
-      SinCos(theta, s, c);
+      SinCos(theta, sin, cos);
 
-      Vx := Cx + c * Lx + s * Ly;
-      Vy := Cy - s * Lx + c * Ly;
+      Vx := Cx + cos * Lx + sin * Ly;
+      Vy := Cy - sin * Lx + cos * Ly;
 
       FPx^ := VVAR * Vx;
       FPy^ := VVAR * Vy;

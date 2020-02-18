@@ -61,16 +61,16 @@ begin
 end;
 procedure TVariationLazysusan.CalcFunction;
 var
-  a, r, sina, cosa, x, y: double;
+  ang, r, sina, cosa, x, y: double;
 begin
-	x := FTx^ - lazysusan_x;
-	y := FTy^ + lazysusan_y;
-	r := sqrt(x*x + y*y);
+  x := FTx^ - lazysusan_x;
+  y := FTy^ + lazysusan_y;
+  r := sqrt(x*x + y*y);
 
-	if (r < VVAR) then
+  if (r < VVAR) then
   begin
-    a := ArcTan2(y, x) + lazysusan_spin + lazysusan_twist*(VVAR-r);
-    sincos(a, sina, cosa);
+    ang := ArcTan2(y, x) + lazysusan_spin + lazysusan_twist*(VVAR-r);
+    sincos(ang, sina, cosa);
     FPx^ := FPx^ + VVAR * (r*cosa + lazysusan_x);
     FPy^ := FPy^ + VVAR * (r*sina - lazysusan_y);
   end else begin

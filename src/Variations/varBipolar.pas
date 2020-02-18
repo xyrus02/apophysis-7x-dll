@@ -63,7 +63,7 @@ begin
 end;
 
 procedure TVariationBipolar.CalcFunction;
-var x2y2, y, t, x2, f, g : double;
+var x2y2, y, t, x2, ff, g : double;
 begin
   x2y2 := sqr(FTx^) + sqr(FTy^);
   y := 0.5 * ArcTan2(2.0 * FTy^, x2y2 - 1.0) + (s);
@@ -76,10 +76,10 @@ begin
     t := x2y2 + 1.0;
     x2 := 2.0 * FTx^;
 
-    f := t + x2;
+    ff := t + x2;
     g := t - x2;
 
-    if (g = 0) or (f/g <= 0) then
+    if (g = 0) or (ff/g <= 0) then
       Exit;
     
     FPx^ := FPx^ + (v_4) * Ln((t+x2) / (t-x2));

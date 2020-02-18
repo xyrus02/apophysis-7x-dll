@@ -5,7 +5,7 @@ interface
     SysUtils, Classes, Windows, Graphics, Math, RenderingInterface,
     ControlPoint, Global, RenderingCommon, RenderingImplementation,
     ImageMaker, Logging, ParameterIO, Translation,
-    varGenericPlugin, PngImage;
+    varGenericPlugin;
 
   procedure InternalUpdateParameterDependencies; stdcall;
 
@@ -123,19 +123,19 @@ implementation
   end;
   procedure InternalSetOnOperationChangeCallback(input : Pointer); stdcall;
   begin
-    @G_OnOperation := input;
+    Pointer(G_OnOperation) := input;
   end;
   procedure InternalSetOnProgressCallback(input : Pointer); stdcall;
   begin
-    @G_OnProgress := input;
+    Pointer(G_OnProgress) := input;
   end;
   procedure InternalSetOnRequestBufferCallback(input: Pointer); stdcall;
   begin
-    @G_OnReqBuffer := input;
+    Pointer(G_OnReqBuffer) := input;
   end;
   procedure InternalSetOnLogCallback(input: Pointer); stdcall;
   begin
-    @G_OnLog := input;
+    Pointer(G_OnLog) := input;
   end;
   procedure InternalSetBufferSavePathString(str: PChar); stdcall;
   begin
@@ -351,21 +351,6 @@ implementation
 
     LogWrite('INFO|' + IntToStr(G_SizeX * G_SizeY * 4) + ' bytes written to output stream', 'render.log');
   end;
-  procedure PaintToDcAlpha(dc: HDC; bmp: TPNGObject);
-  var blendfunc: BLENDFUNCTION; result : LongBool;
-  begin
-    blendfunc.BlendOp := AC_SRC_OVER;
-    blendfunc.BlendFlags := 0;
-    blendfunc.SourceConstantAlpha := 255;
-    blendfunc.AlphaFormat := 0;
-    if (dc <> 0) then result := AlphaBlend(dc, 0, 0, G_SizeX, G_SizeY, bmp.Canvas.Handle,
-      0, 0, G_SizeX, G_SizeY, blendfunc) else result := true;
-    if (result = false) then
-      LogWrite('WARNING|' + SysErrorMessage(GetLastError), 'render.log');
-
-    if (G_ImagePath <> '') then
-      bmp.SaveToFile(G_ImagePath);
-  end;
 
   procedure InternalCancelRenderingProcess; stdcall;
   begin
@@ -408,8 +393,8 @@ implementation
     if (G_SetVibrancy) then G_Flame.vibrancy := 1
     else G_Flame.vibrancy := G_Vibrancy;
 
-    G_Renderer.OnProgress := G_Handler.OnProgress;
-    G_Renderer.OnOperation := G_Handler.OnOperation;
+    G_Renderer.OnProgress := @G_Handler.OnProgress;
+    G_Renderer.OnOperation := @G_Handler.OnOperation;
     G_Renderer.BufferPath := G_BufferPath;
 
     try
@@ -467,9 +452,9 @@ implementation
       if (G_SetVibrancy) then G_Flame.vibrancy := 1
       else G_Flame.vibrancy := G_Vibrancy;
       
-      G_Renderer.OnProgress := G_Handler.OnProgress;
-      G_Renderer.OnOperation := G_Handler.OnOperation;
-      G_Renderer.CopyBufferCallback := G_Handler.OnRequestBuffer;
+      G_Renderer.OnProgress := @G_Handler.OnProgress;
+      G_Renderer.OnOperation := @G_Handler.OnOperation;
+      G_Renderer.CopyBufferCallback := @G_Handler.OnRequestBuffer;
       //G_Renderer.BufferPath := '';
 
       G_Renderer.ProcessBuffer(G_SamplesPerPixel);

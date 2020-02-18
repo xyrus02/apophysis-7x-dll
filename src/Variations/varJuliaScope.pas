@@ -42,7 +42,7 @@ type
   TVariationJuliaScope = class(TBaseVariation)
   private
     N: integer;
-    c: double;
+    con: double;
 
     rN: integer;
     cn: double;
@@ -67,7 +67,7 @@ type
 
     procedure Prepare; override;
     procedure CalcFunction; override;
-    procedure GetCalcFunction(var f: TCalcFunction); override;
+    procedure GetCalcFunction(var fun: TCalcFunction); override;
   end;
 
 implementation
@@ -81,26 +81,26 @@ uses
 constructor TVariationJuliaScope.Create;
 begin
   N := random(5) + 2;
-  c := 1.0;
+  con := 1.0;
 end;
 
 procedure TVariationJuliaScope.Prepare;
 begin
   rN := abs(N);
-  cn := c / N / 2;
+  cn := con / N / 2;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
-procedure TVariationJuliaScope.GetCalcFunction(var f: TCalcFunction);
+procedure TVariationJuliaScope.GetCalcFunction(var fun: TCalcFunction);
 begin
-  if c = 1 then begin
-    if N = 2 then f := CalcPower2
-    else if N = -2 then f := CalcPowerMinus2
-    else if N = 1 then f := CalcPower1
-    else if N = -1 then f := CalcPowerMinus1
-    else f := CalcFunction;
+  if con = 1 then begin
+    if N = 2 then fun := @CalcPower2
+    else if N = -2 then fun := @CalcPowerMinus2
+    else if N = 1 then fun := @CalcPower1
+    else if N = -1 then fun := @CalcPowerMinus1
+    else fun := @CalcFunction;
   end
-  else f := CalcFunction;
+  else fun := @CalcFunction;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -206,7 +206,7 @@ begin
     Result := True;
   end
   else if Name = var_c_name then begin
-    c := value;
+    con := value;
     Result := True;
   end;
 end;
@@ -220,7 +220,7 @@ begin
     Result := True;
   end
   else if Name = var_c_name then begin
-    c := 1;
+    con := 1;
     Result := True;
   end;
 end;
@@ -240,7 +240,7 @@ begin
     Result := true;
   end
   else if Name = var_c_name then begin
-    Value := c;
+    Value := con;
     Result := true;
   end;
 end;

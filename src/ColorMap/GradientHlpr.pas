@@ -59,6 +59,7 @@ var
   BitMap: TBitMap;
   i, j: integer;
   Row: pRGBTripleArray;
+
   pal: TColorMap;
 begin
   GetCMap(index, hue_rotation, pal);
@@ -71,9 +72,9 @@ begin
   for j := 0 to Bitmap.Height - 1 do begin
     Row := Bitmap.Scanline[j];
     for i := 0 to Bitmap.Width - 1 do begin
-      Row[i].rgbtRed := Pal[i][0];
-      Row[i].rgbtGreen := Pal[i][1];
-      Row[i].rgbtBlue := Pal[i][2];
+      Row^[i].rgbtRed := Pal[i][0];
+      Row^[i].rgbtGreen := Pal[i][1];
+      Row^[i].rgbtBlue := Pal[i][2];
     end
   end;
 

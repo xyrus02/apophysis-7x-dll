@@ -68,17 +68,17 @@ function sqrt_safe(x: double): double;
 		else Result := sqrt(x);
 	end;
 var
-  a, b, tmp, x2, xmax: double;
+  aa, bb, tmp, x2, xmax: double;
 begin
   tmp := sqr(FTy^) + sqr(FTx^) + 1.0;
 	x2 := 2.0 * FTx^;
 	xmax := 0.5 * (sqrt(tmp + x2) + sqrt(tmp - x2));
 
-	a := FTx^ / xmax;
-	b := sqrt_safe(1.0 - sqr(a));
+	aa := FTx^ / xmax;
+	bb := sqrt_safe(1.0 - sqr(aa));
 
   FPz^ := FPz^ + vvar * FTz^;
-  FPx^ := FPx^ + v * ArcTan2(a, b);
+  FPx^ := FPx^ + v * ArcTan2(aa, bb);
   
   if (FTy^ > 0) then FPy^ := FPy^ + v * Ln(xmax + sqrt_safe(xmax - 1.0))
   else FPy^ := FPy^ - v * Ln(xmax + sqrt_safe(xmax - 1.0))

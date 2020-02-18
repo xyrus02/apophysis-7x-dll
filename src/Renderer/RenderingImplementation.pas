@@ -22,18 +22,11 @@
 }
 unit RenderingImplementation;
 
-{$ifdef Apo7X64}
-{$else}
-  {$define _ASM_}
-{$endif}
+//{$define _ASM_}
 
 interface
 
 uses
-{$ifdef Apo7X64}
-{$else}
-AsmRandom,
-{$endif}
   Windows, Classes, Forms, Graphics, Global,
   RenderingInterface, Xform, Math, Translation,
   Binary, RenderingCommon, ControlPoint, Sysutils,
@@ -149,15 +142,15 @@ begin
 
   if FCP.FAngle = 0 then begin
     if UseFinalXform then
-      IterateBatchProc := IterateBatchFX
+      IterateBatchProc := @IterateBatchFX
     else
-      IterateBatchProc := IterateBatch;
+      IterateBatchProc := @IterateBatch;
   end
   else begin
     if UseFinalXform then
-      IterateBatchProc := IterateBatchAngleFX
+      IterateBatchProc := @IterateBatchAngleFX
     else
-      IterateBatchProc := IterateBatchAngle;
+      IterateBatchProc := @IterateBatchAngle;
   end;
 
   NSamples := Round(sample_density * NrSlices * bucketSize / (oversample * oversample));
@@ -192,15 +185,15 @@ var
 begin
   if FCP.FAngle = 0 then begin
     if UseFinalXform then
-      IterateBatchProc := IterateBatchFX
+      IterateBatchProc := @IterateBatchFX
     else
-      IterateBatchProc := IterateBatch;
+      IterateBatchProc := @IterateBatch;
   end
   else begin
     if UseFinalXform then
-      IterateBatchProc := IterateBatchAngleFX
+      IterateBatchProc := @IterateBatchAngleFX
     else
-      IterateBatchProc := IterateBatchAngle;
+      IterateBatchProc := @IterateBatchAngle;
   end;
 
   NSamples := Round(sample_density * NrSlices * bucketSize / (oversample * oversample));
@@ -404,10 +397,10 @@ end;
         Bucket.Count := Bucket.Count + 1;
       end;
       {$else}
-        Bucket.Red := Bucket.Red + MapColor.Red;
-        Bucket.Green := Bucket.Green + MapColor.Green;
-        Bucket.Blue := Bucket.Blue + MapColor.Blue;
-        Bucket.Count := Bucket.Count + 1;
+        Bucket^.Red := Bucket^.Red + MapColor^.Red;
+        Bucket^.Green := Bucket^.Green + MapColor^.Green;
+        Bucket^.Blue := Bucket^.Blue + MapColor^.Blue;
+        Bucket^.Count := Bucket^.Count + 1;
       {$endif}
     end;
 
@@ -485,10 +478,10 @@ end;
         Bucket.Count := Bucket.Count + 1;
       end;
       {$else}
-        Bucket.Red := Bucket.Red + MapColor.Red;
-        Bucket.Green := Bucket.Green + MapColor.Green;
-        Bucket.Blue := Bucket.Blue + MapColor.Blue;
-        Bucket.Count := Bucket.Count + 1;
+        Bucket^.Red := Bucket^.Red + MapColor^.Red;
+        Bucket^.Green := Bucket^.Green + MapColor^.Green;
+        Bucket^.Blue := Bucket^.Blue + MapColor^.Blue;
+        Bucket^.Count := Bucket^.Count + 1;
       {$endif}
     end;
 
@@ -566,10 +559,10 @@ end;
         Bucket.Count := Bucket.Count + 1;
       end;
       {$else}
-        Bucket.Red := Bucket.Red + MapColor.Red;
-        Bucket.Green := Bucket.Green + MapColor.Green;
-        Bucket.Blue := Bucket.Blue + MapColor.Blue;
-        Bucket.Count := Bucket.Count + 1;
+        Bucket^.Red := Bucket^.Red + MapColor^.Red;
+        Bucket^.Green := Bucket^.Green + MapColor^.Green;
+        Bucket^.Blue := Bucket^.Blue + MapColor^.Blue;
+        Bucket^.Count := Bucket^.Count + 1;
       {$endif}
     end;
 
@@ -647,10 +640,10 @@ end;
         Bucket.Count := Bucket.Count + 1;
       end;
       {$else}
-        Bucket.Red := Bucket.Red + MapColor.Red;
-        Bucket.Green := Bucket.Green + MapColor.Green;
-        Bucket.Blue := Bucket.Blue + MapColor.Blue;
-        Bucket.Count := Bucket.Count + 1;
+        Bucket^.Red := Bucket^.Red + MapColor^.Red;
+        Bucket^.Green := Bucket^.Green + MapColor^.Green;
+        Bucket^.Blue := Bucket^.Blue + MapColor^.Blue;
+        Bucket^.Count := Bucket^.Count + 1;
       {$endif}
     end;
 
@@ -690,10 +683,10 @@ begin
       Bucket.Count := Bucket.Count + 1;
     end;
     {$else}
-      Bucket.Red := Bucket.Red + MapColor.Red;
-      Bucket.Green := Bucket.Green + MapColor.Green;
-      Bucket.Blue := Bucket.Blue + MapColor.Blue;
-      Bucket.Count := Bucket.Count + 1;
+      Bucket^.Red := Bucket^.Red + MapColor^.Red;
+      Bucket^.Green := Bucket^.Green + MapColor^.Green;
+      Bucket^.Blue := Bucket^.Blue + MapColor^.Blue;
+      Bucket^.Count := Bucket^.Count + 1;
     {$endif}
   end;
 end;
@@ -727,10 +720,10 @@ begin
       Bucket.Count := Bucket.Count + 1;
     end;
     {$else}
-      Bucket.Red := Bucket.Red + MapColor.Red;
-      Bucket.Green := Bucket.Green + MapColor.Green;
-      Bucket.Blue := Bucket.Blue + MapColor.Blue;
-      Bucket.Count := Bucket.Count + 1;
+      Bucket^.Red := Bucket^.Red + MapColor^.Red;
+      Bucket^.Green := Bucket^.Green + MapColor^.Green;
+      Bucket^.Blue := Bucket^.Blue + MapColor^.Blue;
+      Bucket^.Count := Bucket^.Count + 1;
     {$endif}
   end;
 end;
@@ -780,9 +773,9 @@ begin
   assert(Result<>nil);
 
   if FCP.FAngle = 0 then
-    Result.AddPointsProc := self.AddPointsToBuckets
+    Result.AddPointsProc := @self.AddPointsToBuckets
   else
-    Result.AddPointsProc := self.AddPointsToBucketsAngle;
+    Result.AddPointsProc := @self.AddPointsToBucketsAngle;
 
   Result.CriticalSection := CriticalSection;
   Result.Nrbatches := FNumBatches;

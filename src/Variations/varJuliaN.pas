@@ -10,16 +10,13 @@ const
   var_n_name='julian_power';
   var_c_name='julian_dist';
 
-{$ifdef Apo7X64}
-{$else}
-  {$define _ASM_}
-{$endif}
+  //{$define _ASM_}
 
 type
   TVariationJulian = class(TBaseVariation)
   private
     N: integer;
-    c: double;
+    con: double;
 
     absN: integer;
     cN, vvar2: double;
@@ -44,7 +41,7 @@ type
 
     procedure Prepare; override;
     procedure CalcFunction; override;
-    procedure GetCalcFunction(var f: TCalcFunction); override;
+    procedure GetCalcFunction(var fun: TCalcFunction); override;
   end;
 
 implementation
@@ -58,28 +55,28 @@ uses
 constructor TVariationJulian.Create;
 begin
   N := random(5) + 2;
-  c := 1.0;
+  con := 1.0;
 end;
 
 procedure TVariationJulian.Prepare;
 begin
   absN := abs(N);
-  cN := c / N / 2;
+  cN := con / N / 2;
 
   vvar2 := vvar * sqrt(2)/2;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
-procedure TVariationJulian.GetCalcFunction(var f: TCalcFunction);
+procedure TVariationJulian.GetCalcFunction(var fun: TCalcFunction);
 begin
-  if c = 1 then begin
-    if N = 2 then f := CalcPower2
-    else if N = -2 then f := CalcPowerMinus2
-    else if N = 1 then f := CalcPower1
-    else if N = -1 then f := CalcPowerMinus1
-    else f := CalcFunction;
+  if con = 1 then begin
+    if N = 2 then fun := @CalcPower2
+    else if N = -2 then fun := @CalcPowerMinus2
+    else if N = 1 then fun := @CalcPower1
+    else if N = -1 then fun := @CalcPowerMinus1
+    else fun := @CalcFunction;
   end
-  else f := CalcFunction;
+  else fun := @CalcFunction;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,17 +95,17 @@ end;
 
 procedure TVariationJulian.CalcPower2;
 var
-  d: double;
+  dist: double;
 begin
-  d := sqrt( sqrt(sqr(FTx^) + sqr(FTy^)) + FTx^ );
+  dist := sqrt( sqrt(sqr(FTx^) + sqr(FTy^)) + FTx^ );
 
   if random(2) = 0 then begin
-    FPx^ := FPx^ + vvar2 * d;
-    FPy^ := FPy^ + vvar2 / d * FTy^;
+    FPx^ := FPx^ + vvar2 * dist;
+    FPy^ := FPy^ + vvar2 / dist * FTy^;
   end
   else begin
-    FPx^ := FPx^ - vvar2 * d;
-    FPy^ := FPy^ - vvar2 / d * FTy^;
+    FPx^ := FPx^ - vvar2 * dist;
+    FPy^ := FPy^ - vvar2 / dist * FTy^;
   end;
   FPz^ := FPz^ + vvar * FTz^;
 end;
@@ -186,7 +183,7 @@ begin
     Result := True;
   end
   else if Name = var_c_name then begin
-    c := value;
+    con := value;
     Result := True;
   end;
 end;
@@ -200,7 +197,7 @@ begin
     Result := True;
   end
   else if Name = var_c_name then begin
-    c := 1;
+    con := 1;
     Result := True;
   end;
 end;
@@ -220,7 +217,7 @@ begin
     Result := true;
   end
   else if Name = var_c_name then begin
-    Value := c;
+    Value := con;
     Result := true;
   end;
 end;

@@ -64,7 +64,7 @@ type
 
     procedure Prepare; override;
     procedure CalcFunction; override;
-    procedure GetCalcFunction(var f: TCalcFunction); override;
+    procedure GetCalcFunction(var fun: TCalcFunction); override;
   end;
 
 implementation
@@ -93,11 +93,11 @@ begin
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
-procedure TVariationRadialBlur.GetCalcFunction(var f: TCalcFunction);
+procedure TVariationRadialBlur.GetCalcFunction(var fun: TCalcFunction);
 begin
-  if IsZero(spin_var) then f := CalcZoom
-  else if IsZero(zoom_var) then f := CalcSpin
-  else f := CalcFunction;
+  if IsZero(spin_var) then fun := @CalcZoom
+  else if IsZero(zoom_var) then fun := @CalcSpin
+  else fun := @CalcFunction;
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
