@@ -232,7 +232,6 @@ type
     FOnProgress: TOnProgress;
     FOnOperation: TOnOperation;
     FCopyBuffer: TCopyBufferCallback;
-    FCP: TControlPoint;
     FMaxMem: int64;
     FBufferPath: string;
     FNrThreads: integer;
@@ -244,6 +243,9 @@ type
     function GetNrThreads: integer;
 
     procedure SetNrThreads(v: integer);
+
+  protected
+    FCP: TControlPoint;
 
   public
     destructor Destroy; override;

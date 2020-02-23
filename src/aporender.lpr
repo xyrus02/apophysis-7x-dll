@@ -12,8 +12,6 @@ uses
   Interfaces,
   Binary in 'IO\Binary.pas',
   Translation in 'Core\Translation.pas',
-  LibXmlComps in 'System\LibXmlComps.pas',
-  LibXmlParser in 'System\LibXmlParser.pas',
   RegexHelper in 'System\RegexHelper.pas',
   RexExpr in 'System\RegExpr.pas',
   Global in 'Core\Global.pas',
@@ -189,9 +187,10 @@ uses
   end;
   function ApophysisGetRegisteredNameAt(index: integer; var buf: string): integer; stdcall; export;
   var str: string;
-  var chars: PChar;
+  //var chars: PChar;
   begin
-    Result := InternalGetRegisteredNameAt(index, str); chars := PChar(str);
+    str := '';
+    Result := InternalGetRegisteredNameAt(index, str);  //chars := PChar(str);
     Buf := str; //Move(chars, buf, Result * SizeOf(Char));
   end;
   function ApophysisGetRegisteredAttribCount: integer; stdcall; export;
@@ -200,9 +199,10 @@ uses
   end;
   function ApophysisGetRegisteredAttribAt(index: integer; var buf: string): integer; stdcall; export;
   var str: string;
-  var chars: PChar;
+  //var chars: PChar;
   begin
-    Result := InternalGetRegisteredAttribAt(index, str);  chars := PChar(str);
+    str := '';
+    Result := InternalGetRegisteredAttribAt(index, str);  //chars := PChar(str);
     Buf := str; //Move(chars, buf, Result * SizeOf(Char));
   end;
 

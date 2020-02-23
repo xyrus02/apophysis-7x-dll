@@ -7,8 +7,8 @@ interface
 function IsRegisteredVariation(name: string): boolean;
 function IsRegisteredVariable(name: string): boolean;
 
-procedure LoadPaletteFromXmlCompatible(xml: Utf8String; var cp: TControlPoint);
-procedure LoadXFormFromXmlCompatible(xml: Utf8String; isFinalXForm: boolean; var xf: TXForm; var enabled: boolean);
+procedure LoadPaletteFromXmlCompatible(xml: string; var cp: TControlPoint);
+procedure LoadXFormFromXmlCompatible(xml: string; isFinalXForm: boolean; var xf: TXForm; var enabled: boolean);
 function LoadCpFromXmlCompatible(xml: string; var cp: TControlPoint; var statusOutput: string): boolean;
 function SaveCpToXmlCompatible(var xml: string; const cp1: TControlPoint): boolean;
 
@@ -55,28 +55,26 @@ const
   re_xform    : string = '<((?:final)?xform)(.*?)/>';
   re_palette  : string = '<palette(.*?)>([a-f0-9\s]+)</palette>';
   re_attrib   : string = '([0-9a-z_]+)="(.*?)"';
-  re_strtoken : string = '([a-z0-9_]+)';
 var
-  flame_attribs   : Utf8String;
-  flame_content   : Utf8String;
-  xform_type      : Utf8String;
-  xform_attribs   : Utf8String;
-  palette_attribs : Utf8String;
-  palette_content : Utf8String;
+  flame_attribs   : string;
+  flame_content   : string;
+  xform_type      : string;
+  xform_attribs   : string;
+  palette_attribs : string;
+  palette_content : string;
 
   find_attribs : TRegExpr;
   found_attrib : boolean;
-  attrib_name  : Utf8String;
-  attrib_match : Utf8String;
+  attrib_name  : string;
+  attrib_match : string;
 
   find_xforms : TRegExpr;
   found_xform : boolean;
   xform_index : integer;
 
-  find_strtokens : TRegExpr;
   found_strtoken : boolean;
   strtoken_index : integer;
-  strtoken_value : Utf8String;
+  strtoken_value : string;
 
   find_palette : TRegExpr;
 
@@ -88,32 +86,29 @@ var
   attrib_success: boolean;
   i: integer;
 begin
-  find_strtokens := TRegExpr.Create;
   find_attribs := TRegExpr.Create;
   find_xforms := TRegExpr.Create;
   find_palette := TRegExpr.Create;
 
-  find_attribs.Expression := Utf8String(re_attrib);
-  find_strtokens.Expression := Utf8String(re_strtoken);
-  find_xforms.Expression := Utf8String(re_xform);
-  find_palette.Expression := Utf8String(re_palette);
+  find_attribs.Expression := re_attrib;
+  find_xforms.Expression := re_xform;
+  find_palette.Expression := re_palette;
 
   find_attribs.ModifierStr := 'si';
-  find_strtokens.ModifierStr := 'si';
   find_xforms.ModifierStr := 'si';
   find_palette.ModifierStr := 'si';
 
-  flame_attribs := Utf8String(GetStringPart(xml, re_flame, 1, ''));
-  flame_content := Utf8String(GetStringPart(xml, re_flame, 2, ''));
+  flame_attribs := GetStringPart(xml, re_flame, 1, '');
+  flame_content := GetStringPart(xml, re_flame, 2, '');
 
-  find_attribs.InputString := Utf8String(flame_attribs);
-  found_attrib := find_attribs.ExecNext;
+  find_attribs.InputString := flame_attribs;
+  found_attrib := find_attribs.Exec;
 
   Result := true;
   
   while found_attrib do begin
     attrib_match := find_attribs.Match[0];
-    attrib_name := Utf8String(Lowercase(String(find_attribs.Match[1])));
+    attrib_name := Lowercase(String(find_attribs.Match[1]));
     attrib_success := true;
 
     if attrib_name = 'name' then
@@ -196,7 +191,7 @@ begin
   cp.cmapindex := -1;
 
   find_xforms.InputString := flame_content;
-  found_xform := find_xforms.ExecNext;
+  found_xform := find_xforms.Exec;
   xform_index := 0;
   cp.finalXformEnabled := false;
 
@@ -222,16 +217,15 @@ begin
     found_xform := find_xforms.ExecNext;
   end;
 
-  find_palette.InputString := Utf8String(xml);
-  if (find_palette.ExecNext) then
+  find_palette.InputString := xml;
+  if (find_palette.Exec) then
     LoadPaletteFromXmlCompatible(find_palette.Match[0], cp);
 
-  find_strtokens.Free;
   find_attribs.Free;
   find_xforms.Free;
   find_palette.Free;
 end;
-procedure LoadPaletteFromXmlCompatible(xml: Utf8String; var cp: TControlPoint);
+procedure LoadPaletteFromXmlCompatible(xml: string; var cp: TControlPoint);
 const
   re_palette: string = '<palette(.*?)>([a-f0-9\s]+)</palette>';
   re_attrib : string = '([0-9a-z_]+)="(.*?)"';
@@ -242,8 +236,8 @@ var
 
   find_attribs : TRegExpr;
   found_attrib : boolean;
-  attrib_name  : Utf8String;
-  attrib_match : Utf8String;
+  attrib_name  : string;
+  attrib_match : string;
   attrib_success : Boolean;
 function HexChar(c: Char): Byte;
   begin
@@ -256,26 +250,26 @@ function HexChar(c: Char): Byte;
     end;
   end;
 begin
-  hexdata := GetStringPart(String(xml), re_palette, 2, '');
-  attr := GetStringPart(String(xml), re_palette, 1, '');
+  hexdata := GetStringPart(xml, re_palette, 2, '');
+  attr := GetStringPart(xml, re_palette, 1, '');
 
   find_attribs := TRegExpr.Create;
-  find_attribs.Expression := Utf8String(re_attrib);
+  find_attribs.Expression := re_attrib;
   find_attribs.ModifierStr := 'si';
-  find_attribs.InputString := Utf8String(attr);
-  found_attrib := find_attribs.ExecNext;
+  find_attribs.InputString := attr;
+  found_attrib := find_attribs.Exec;
 
   count := 0;
   
   while found_attrib do begin
     attrib_match := find_attribs.Match[0];
-    attrib_name := Utf8String(Lowercase(String(find_attribs.Match[1])));
+    attrib_name := Lowercase(find_attribs.Match[1]);
     attrib_success := true;
 
     if (attrib_name = 'count') then
-      count := GetIntPart(String(attrib_match), re_attrib, 2, 256)
+      count := GetIntPart(attrib_match, re_attrib, 2, 256)
     else if (attrib_name = 'format') then
-      format := GetStringPart(String(attrib_match), re_attrib, 2, 'RGB');
+      format := GetStringPart(attrib_match, re_attrib, 2, 'RGB');
 
     found_attrib := find_attribs.ExecNext;
   end;
@@ -302,7 +296,7 @@ begin
     cp.cmap[i][2] := 16 * HexChar(Data[pos + 5]) + HexChar(Data[pos + 6]);
   end;
 end;
-procedure LoadXFormFromXmlCompatible(xml: Utf8String; isFinalXForm: boolean; var xf: TXForm; var enabled: boolean);
+procedure LoadXFormFromXmlCompatible(xml: string; isFinalXForm: boolean; var xf: TXForm; var enabled: boolean);
 const
   re_attrib : string = '([0-9a-z_]+)="(.*?)"';
   re_xform  : string = '<((?:final)?xform)(.*?)/>';
@@ -311,8 +305,8 @@ var
   xform_attribs: string;
   find_attribs : TRegExpr;
   found_attrib : boolean;
-  attrib_name  : Utf8String;
-  attrib_match : Utf8String;
+  attrib_name  : string;
+  attrib_match : string;
   token_part   : string;
   i, j         : integer;
   d            : double;
@@ -321,13 +315,13 @@ var
   attrib_success: Boolean;
 begin
   enabled := true;
-  xform_attribs := GetStringPart(String(xml), re_xform, 2, '');
+  xform_attribs := GetStringPart(xml, re_xform, 2, '');
 
   find_attribs := TRegExpr.Create;
-  find_attribs.Expression := Utf8String(re_attrib);
+  find_attribs.Expression := re_attrib;
   find_attribs.ModifierStr := 'si';
-  find_attribs.InputString := Utf8String(xform_attribs);
-  found_attrib := find_attribs.ExecNext;
+  find_attribs.InputString := xform_attribs;
+  found_attrib := find_attribs.Exec;
 
   for i := 0 to NRVAR-1 do
     xf.SetVariation(i, 0);
@@ -338,16 +332,16 @@ begin
     attrib_success := true;
 
     if (attrib_name = 'enabled') and isFinalXform then
-      enabled := GetBoolPart(String(attrib_match), re_attrib, 2, true)
+      enabled := GetBoolPart(attrib_match, re_attrib, 2, true)
     else if (attrib_name = 'weight') and (not isFinalXform) then
-      xf.density := GetFloatPart(String(attrib_match), re_attrib, 2, 0.5)
+      xf.density := GetFloatPart(attrib_match, re_attrib, 2, 0.5)
     else if (attrib_name = 'symmetry') and (not isFinalXform) then
-      xf.symmetry := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
+      xf.symmetry := GetFloatPart(attrib_match, re_attrib, 2, 0)
     else if (attrib_name = 'color_speed') and (not isFinalXform) then
-      xf.symmetry := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
+      xf.symmetry := GetFloatPart(attrib_match, re_attrib, 2, 0)
     else if (attrib_name = 'chaos') and (not isFinalXform) then
       begin
-        token_part := GetStringPart(String(attrib_match), re_attrib, 2, '');
+        token_part := GetStringPart(attrib_match, re_attrib, 2, '');
         if token_part <> '' then
           begin
             t := TStringList.Create;
@@ -358,14 +352,14 @@ begin
           end;
       end
     else if (attrib_name = 'opacity') and (not isFinalXform) then
-      xf.transOpacity := GetFloatPart(String(attrib_match), re_attrib, 2, 1)
+      xf.transOpacity := GetFloatPart(attrib_match, re_attrib, 2, 1)
     else if (attrib_name = 'name') and (not isFinalXform) then
-      xf.TransformName := GetStringPart(String(attrib_match), re_attrib, 2, '')
+      xf.TransformName := GetStringPart(attrib_match, re_attrib, 2, '')
     else if (attrib_name = 'plotmode') and (not isFinalXform) then
-      xf.transOpacity := StrToFloat(IfThen(LowerCase(GetStringPart(String(attrib_match), re_attrib, 2, '')) = 'off', '0', '1'))
+      xf.transOpacity := StrToFloat(IfThen(LowerCase(GetStringPart(attrib_match, re_attrib, 2, '')) = 'off', '0', '1'))
     else if (attrib_name = 'coefs') then
       begin
-        token_part := GetStringPart(String(attrib_match), re_attrib, 2, '1 0 0 1 0 0');
+        token_part := GetStringPart(attrib_match, re_attrib, 2, '1 0 0 1 0 0');
         xf.c[0][0] := GetFloatPart(token_part, re_coefs, 1, 1);
         xf.c[0][1] := GetFloatPart(token_part, re_coefs, 2, 0);
         xf.c[1][0] := GetFloatPart(token_part, re_coefs, 3, 0);
@@ -375,7 +369,7 @@ begin
       end
     else if (attrib_name = 'post') then
       begin
-        token_part := GetStringPart(String(attrib_match), re_attrib, 2, '1 0 0 1 0 0');
+        token_part := GetStringPart(attrib_match, re_attrib, 2, '1 0 0 1 0 0');
         xf.p[0][0] := GetFloatPart(token_part, re_coefs, 1, 1);
         xf.p[0][1] := GetFloatPart(token_part, re_coefs, 2, 0);
         xf.p[1][0] := GetFloatPart(token_part, re_coefs, 3, 0);
@@ -384,12 +378,12 @@ begin
         xf.p[2][1] := GetFloatPart(token_part, re_coefs, 6, 0);
       end
     else if (attrib_name = 'color') then
-      xf.color := GetFloatPart(String(attrib_match), re_attrib, 2, 0)
+      xf.color := GetFloatPart(attrib_match, re_attrib, 2, 0)
     else if (attrib_name = 'var_color') then
-      xf.vc := GetFloatPart(String(attrib_match), re_attrib, 2, 1)
-    else if ((String(attrib_name) = 'symmetry') or (String(attrib_name) = 'weight') or
-             (String(attrib_name) = 'color_speed') or (String(attrib_name) = 'chaos') or
-             (String(attrib_name) = 'opacity') or (String(attrib_name) = 'name') or
+      xf.vc := GetFloatPart(attrib_match, re_attrib, 2, 1)
+    else if ((String(attrib_name) = 'symmetry') or (attrib_name = 'weight') or
+             (String(attrib_name) = 'color_speed') or (attrib_name = 'chaos') or
+             (String(attrib_name) = 'opacity') or (attrib_name = 'name') or
              (String(attrib_name) = 'plotmode')) and (isFinalXForm) then
       begin
         //EmitWarning('Malformed attribute "xform.' + attrib_name + '" - ignoring');
@@ -398,22 +392,22 @@ begin
       end
     else begin
       if (String(attrib_name) = 'linear3D') then begin
-        xf.SetVariation(0, GetFloatPart(String(attrib_match), re_attrib, 2, 0));
-      end else if (IsRegisteredVariation(String(attrib_name))) then begin
+        xf.SetVariation(0, GetFloatPart(attrib_match, re_attrib, 2, 0));
+      end else if (IsRegisteredVariation(attrib_name)) then begin
         for i := 0 to NRVAR - 1 do begin
-          if lowercase(varnames(i)) = lowercase(String(attrib_name)) then begin
-            xf.SetVariation(i, GetFloatPart(String(attrib_match), re_attrib, 2, 0));
+          if lowercase(varnames(i)) = lowercase(attrib_name) then begin
+            xf.SetVariation(i, GetFloatPart(attrib_match, re_attrib, 2, 0));
             v_set := true;
             break;
           end;
         end;
-        if (IsRegisteredVariable(String(attrib_name))) then begin
-          d := GetFloatPart(String(attrib_match), re_attrib, 2, 0);
-          xf.SetVariable(String(attrib_name), d);
+        if (IsRegisteredVariable(attrib_name)) then begin
+          d := GetFloatPart(attrib_match, re_attrib, 2, 0);
+          xf.SetVariable(attrib_name, d);
         end;
-      end else if (IsRegisteredVariable(String(attrib_name))) then begin
-        d := GetFloatPart(String(attrib_match), re_attrib, 2, 0);
-        xf.SetVariable(String(attrib_name), d);
+      end else if (IsRegisteredVariable(attrib_name)) then begin
+        d := GetFloatPart(attrib_match, re_attrib, 2, 0);
+        xf.SetVariable(attrib_name, d);
       end;
       attrib_success := false;
     end;

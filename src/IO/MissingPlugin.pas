@@ -36,6 +36,7 @@ implementation
   function EndParsing(cp : TControlPoint; var statusPanelText : string): boolean;
   var str, str2 : string; i : integer; newl : TStringList;
   begin
+    str := '';
     str2 := TextByKey('main-status-variationsorvariables');
     if (cp.used_plugins.Count > 0) then begin
       newl := TStringList.Create;

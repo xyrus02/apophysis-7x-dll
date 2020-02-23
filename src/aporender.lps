@@ -9,7 +9,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="..\target\aporender.x86"/>
+            <Filename Value="..\target\aporender-x86"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -19,7 +19,9 @@
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <RelocatableUnit Value="True"/>
+            <TargetProcessor Value="pentium4"/>
             <TargetCPU Value="i386"/>
+            <TargetOS Value="win32"/>
             <Optimizations>
               <OptimizationLevel Value="3"/>
             </Optimizations>
@@ -33,6 +35,13 @@
               <ExecutableType Value="Library"/>
             </Options>
           </Linking>
+          <Other>
+            <Verbosity>
+              <ShowNotes Value="False"/>
+              <ShowHints Value="False"/>
+            </Verbosity>
+            <WriteFPCLogo Value="False"/>
+          </Other>
         </CompilerOptions>
       </Item1>
       <Item2 Name="Debug - x64">
@@ -40,7 +49,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="..\target\debug\aporender.x64"/>
+            <Filename Value="..\target\debug\aporender-x64"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -61,7 +70,9 @@
               <StackChecks Value="True"/>
             </Checks>
             <VerifyObjMethodCallValidity Value="True"/>
+            <TargetProcessor Value="ATHLON64"/>
             <TargetCPU Value="x86_64"/>
+            <TargetOS Value="win64"/>
           </CodeGeneration>
           <Linking>
             <Debugging>
@@ -74,6 +85,13 @@
               <ExecutableType Value="Library"/>
             </Options>
           </Linking>
+          <Other>
+            <Verbosity>
+              <ShowNotes Value="False"/>
+              <ShowHints Value="False"/>
+            </Verbosity>
+            <WriteFPCLogo Value="False"/>
+          </Other>
         </CompilerOptions>
       </Item2>
       <Item3 Name="Release - x64">
@@ -81,7 +99,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="..\target\aporender.x64"/>
+            <Filename Value="..\target\aporender-x64"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -91,7 +109,9 @@
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <RelocatableUnit Value="True"/>
+            <TargetProcessor Value="ATHLON64"/>
             <TargetCPU Value="x86_64"/>
+            <TargetOS Value="win64"/>
             <Optimizations>
               <OptimizationLevel Value="3"/>
             </Optimizations>
@@ -105,26 +125,31 @@
               <ExecutableType Value="Library"/>
             </Options>
           </Linking>
+          <Other>
+            <Verbosity>
+              <ShowNotes Value="False"/>
+              <ShowHints Value="False"/>
+            </Verbosity>
+            <WriteFPCLogo Value="False"/>
+          </Other>
         </CompilerOptions>
       </Item3>
     </BuildModes>
-    <Units Count="80">
+    <Units Count="86">
       <Unit0>
         <Filename Value="aporender.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="7"/>
-        <CursorPos X="81" Y="35"/>
-        <UsageCount Value="20"/>
+        <TopLine Value="171"/>
+        <CursorPos X="70" Y="76"/>
+        <UsageCount Value="26"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="System\AsmRandom.pas"/>
-        <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="34"/>
         <CursorPos Y="68"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="24"/>
       </Unit1>
       <Unit2>
         <Filename Value="IO\Binary.pas"/>
@@ -133,41 +158,42 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit2>
       <Unit3>
         <Filename Value="Core\Translation.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="2"/>
-        <CursorPos X="120" Y="26"/>
-        <UsageCount Value="20"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="18"/>
+        <TopLine Value="565"/>
+        <CursorPos X="71" Y="608"/>
+        <UsageCount Value="26"/>
         <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="System\LibXmlComps.pas"/>
-        <IsPartOfProject Value="True"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="38"/>
+        <EditorIndex Value="17"/>
+        <TopLine Value="34"/>
         <CursorPos X="60" Y="72"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="25"/>
         <Loaded Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="System\LibXmlParser.pas"/>
-        <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <WindowIndex Value="-1"/>
-        <TopLine Value="-1"/>
-        <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="2171"/>
+        <CursorPos X="113" Y="2200"/>
+        <UsageCount Value="25"/>
+        <Loaded Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="System\RegexHelper.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="14"/>
         <TopLine Value="4"/>
-        <CursorPos X="61" Y="30"/>
-        <UsageCount Value="20"/>
+        <CursorPos X="30" Y="25"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
       </Unit6>
       <Unit7>
         <Filename Value="Core\Global.pas"/>
@@ -175,16 +201,16 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="16"/>
         <CursorPos X="82" Y="57"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit7>
       <Unit8>
         <Filename Value="IO\MissingPlugin.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <WindowIndex Value="-1"/>
-        <TopLine Value="-1"/>
-        <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <EditorIndex Value="19"/>
+        <TopLine Value="10"/>
+        <CursorPos X="18" Y="56"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
       </Unit8>
       <Unit9>
         <Filename Value="IO\Regstry.pas"/>
@@ -193,14 +219,16 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit9>
       <Unit10>
         <Filename Value="IO\ParameterIO.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="54" Y="8"/>
-        <UsageCount Value="20"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="79"/>
+        <CursorPos X="52" Y="84"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
       </Unit10>
       <Unit11>
         <Filename Value="Core\Bezier.pas"/>
@@ -209,7 +237,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit11>
       <Unit12>
         <Filename Value="Flame\RndFlame.pas"/>
@@ -218,15 +246,16 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit12>
       <Unit13>
         <Filename Value="Flame\ControlPoint.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="2479"/>
-        <CursorPos X="55" Y="2515"/>
-        <UsageCount Value="20"/>
+        <EditorIndex Value="10"/>
+        <TopLine Value="250"/>
+        <CursorPos X="16" Y="280"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
       </Unit13>
       <Unit14>
         <Filename Value="ColorMap\cmapdata.pas"/>
@@ -235,7 +264,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit14>
       <Unit15>
         <Filename Value="ColorMap\cmap.pas"/>
@@ -244,15 +273,16 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit15>
       <Unit16>
         <Filename Value="ColorMap\GradientHlpr.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="22"/>
-        <CursorPos X="40" Y="69"/>
-        <UsageCount Value="20"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="42"/>
+        <CursorPos X="19" Y="73"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
       </Unit16>
       <Unit17>
         <Filename Value="Core\XFormMan.pas"/>
@@ -261,15 +291,16 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit17>
       <Unit18>
         <Filename Value="Flame\XForm.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1277"/>
-        <CursorPos X="59" Y="1318"/>
-        <UsageCount Value="20"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="213"/>
+        <CursorPos X="84" Y="231"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
       </Unit18>
       <Unit19>
         <Filename Value="Core\BaseVariation.pas"/>
@@ -277,32 +308,34 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="140"/>
         <CursorPos X="46" Y="183"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit19>
       <Unit20>
         <Filename Value="Renderer\RenderingCommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <WindowIndex Value="-1"/>
-        <TopLine Value="-1"/>
-        <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <EditorIndex Value="13"/>
+        <TopLine Value="9"/>
+        <CursorPos X="61" Y="38"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
       </Unit20>
       <Unit21>
         <Filename Value="Renderer\RenderingInterface.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1004"/>
-        <CursorPos Y="1034"/>
-        <UsageCount Value="20"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="920"/>
+        <CursorPos X="27" Y="963"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
       </Unit21>
       <Unit22>
         <Filename Value="Renderer\RenderingImplementation.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="725"/>
-        <CursorPos X="30" Y="778"/>
-        <UsageCount Value="20"/>
+        <EditorIndex Value="9"/>
+        <TopLine Value="214"/>
+        <CursorPos X="29" Y="245"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
       </Unit22>
       <Unit23>
         <Filename Value="Renderer\BucketFillerThread.pas"/>
@@ -310,15 +343,16 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="48"/>
         <CursorPos Y="84"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit23>
       <Unit24>
         <Filename Value="Renderer\ImageMaker.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="672"/>
-        <CursorPos X="31" Y="727"/>
-        <UsageCount Value="20"/>
+        <EditorIndex Value="11"/>
+        <TopLine Value="97"/>
+        <CursorPos X="73" Y="111"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
       </Unit24>
       <Unit25>
         <Filename Value="Variations\varHemisphere.pas"/>
@@ -327,7 +361,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit25>
       <Unit26>
         <Filename Value="Variations\varLog.pas"/>
@@ -336,7 +370,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit26>
       <Unit27>
         <Filename Value="Variations\varPolar2.pas"/>
@@ -345,7 +379,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit27>
       <Unit28>
         <Filename Value="Variations\varRings2.pas"/>
@@ -354,7 +388,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit28>
       <Unit29>
         <Filename Value="Variations\varFan2.pas"/>
@@ -362,7 +396,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="55"/>
         <CursorPos X="41" Y="97"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit29>
       <Unit30>
         <Filename Value="Variations\varCross.pas"/>
@@ -371,7 +405,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit30>
       <Unit31>
         <Filename Value="Variations\varWedge.pas"/>
@@ -379,7 +413,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="37"/>
         <CursorPos X="50" Y="78"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit31>
       <Unit32>
         <Filename Value="Variations\varEpispiral.pas"/>
@@ -388,7 +422,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit32>
       <Unit33>
         <Filename Value="Variations\varBwraps.pas"/>
@@ -396,7 +430,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="73"/>
         <CursorPos X="101" Y="110"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit33>
       <Unit34>
         <Filename Value="Variations\varpdj.pas"/>
@@ -405,7 +439,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit34>
       <Unit35>
         <Filename Value="Variations\varJuliaN.pas"/>
@@ -413,7 +447,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="67"/>
         <CursorPos X="79" Y="102"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit35>
       <Unit36>
         <Filename Value="Variations\varJuliaScope.pas"/>
@@ -421,7 +455,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="189"/>
         <CursorPos X="120" Y="222"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit36>
       <Unit37>
         <Filename Value="Variations\varJulia3Djf.pas"/>
@@ -429,7 +463,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="47"/>
         <CursorPos X="28" Y="92"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit37>
       <Unit38>
         <Filename Value="Variations\varJulia3Dz.pas"/>
@@ -437,7 +471,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="62"/>
         <CursorPos X="66" Y="95"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit38>
       <Unit39>
         <Filename Value="Variations\varCurl.pas"/>
@@ -445,7 +479,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="74"/>
         <CursorPos X="43" Y="109"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit39>
       <Unit40>
         <Filename Value="Variations\varCurl3D.pas"/>
@@ -453,7 +487,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="83"/>
         <CursorPos X="54" Y="130"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit40>
       <Unit41>
         <Filename Value="Variations\varRadialBlur.pas"/>
@@ -461,7 +495,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="57"/>
         <CursorPos X="16" Y="100"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit41>
       <Unit42>
         <Filename Value="Variations\varBlurCircle.pas"/>
@@ -470,7 +504,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit42>
       <Unit43>
         <Filename Value="Variations\varBlurZoom.pas"/>
@@ -479,7 +513,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit43>
       <Unit44>
         <Filename Value="Variations\varBlurPixelize.pas"/>
@@ -488,7 +522,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit44>
       <Unit45>
         <Filename Value="Variations\varFalloff2.pas"/>
@@ -496,7 +530,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="102"/>
         <CursorPos X="116" Y="134"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit45>
       <Unit46>
         <Filename Value="Variations\varRectangles.pas"/>
@@ -504,7 +538,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="19"/>
         <CursorPos X="47" Y="73"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit46>
       <Unit47>
         <Filename Value="Variations\varSplits.pas"/>
@@ -513,7 +547,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit47>
       <Unit48>
         <Filename Value="Variations\varSeparation.pas"/>
@@ -522,7 +556,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit48>
       <Unit49>
         <Filename Value="Variations\varBipolar.pas"/>
@@ -530,7 +564,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="35"/>
         <CursorPos X="36" Y="71"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit49>
       <Unit50>
         <Filename Value="Variations\varLoonie.pas"/>
@@ -539,7 +573,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit50>
       <Unit51>
         <Filename Value="Variations\varEscher.pas"/>
@@ -547,7 +581,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="35"/>
         <CursorPos X="41" Y="78"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit51>
       <Unit52>
         <Filename Value="Variations\varScry.pas"/>
@@ -556,7 +590,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit52>
       <Unit53>
         <Filename Value="Variations\varNGon.pas"/>
@@ -565,7 +599,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit53>
       <Unit54>
         <Filename Value="Variations\varFoci.pas"/>
@@ -574,7 +608,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit54>
       <Unit55>
         <Filename Value="Variations\varLazysusan.pas"/>
@@ -582,7 +616,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="33"/>
         <CursorPos X="32" Y="81"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit55>
       <Unit56>
         <Filename Value="Variations\varMobius.pas"/>
@@ -591,7 +625,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit56>
       <Unit57>
         <Filename Value="Variations\varCrop.pas"/>
@@ -600,7 +634,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit57>
       <Unit58>
         <Filename Value="Variations\varElliptic.pas"/>
@@ -608,7 +642,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="40"/>
         <CursorPos X="42" Y="77"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit58>
       <Unit59>
         <Filename Value="Variations\varWaves2.pas"/>
@@ -617,7 +651,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit59>
       <Unit60>
         <Filename Value="Variations\varAuger.pas"/>
@@ -626,7 +660,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit60>
       <Unit61>
         <Filename Value="Variations\varPreSpherical.pas"/>
@@ -635,7 +669,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit61>
       <Unit62>
         <Filename Value="Variations\varPreSinusoidal.pas"/>
@@ -644,7 +678,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit62>
       <Unit63>
         <Filename Value="Variations\varPreDisc.pas"/>
@@ -653,7 +687,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit63>
       <Unit64>
         <Filename Value="Variations\varPreBwraps.pas"/>
@@ -661,7 +695,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="77"/>
         <CursorPos X="26" Y="105"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit64>
       <Unit65>
         <Filename Value="Variations\varPreCrop.pas"/>
@@ -670,7 +704,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit65>
       <Unit66>
         <Filename Value="Variations\varPreFalloff2.pas"/>
@@ -678,7 +712,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="102"/>
         <CursorPos X="129" Y="134"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit66>
       <Unit67>
         <Filename Value="Variations\varPostBwraps.pas"/>
@@ -686,7 +720,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="67"/>
         <CursorPos X="59" Y="89"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit67>
       <Unit68>
         <Filename Value="Variations\varPostCurl.pas"/>
@@ -695,7 +729,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit68>
       <Unit69>
         <Filename Value="Variations\varPostCurl3D.pas"/>
@@ -704,7 +738,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit69>
       <Unit70>
         <Filename Value="Variations\varPostCrop.pas"/>
@@ -713,7 +747,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit70>
       <Unit71>
         <Filename Value="Variations\varPostFalloff2.pas"/>
@@ -721,7 +755,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="53"/>
         <CursorPos X="87" Y="92"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit71>
       <Unit72>
         <Filename Value="Variations\varGenericPlugin.pas"/>
@@ -729,7 +763,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="79"/>
         <CursorPos Y="108"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit72>
       <Unit73>
         <Filename Value="Core\Logging.pas"/>
@@ -738,33 +772,34 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit73>
       <Unit74>
         <Filename Value="Main.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="416"/>
-        <CursorPos X="41" Y="457"/>
-        <UsageCount Value="20"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="178"/>
+        <CursorPos Y="231"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
       </Unit74>
       <Unit75>
         <Filename Value="Params.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <WindowIndex Value="-1"/>
-        <TopLine Value="-1"/>
-        <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="20"/>
+        <EditorIndex Value="16"/>
+        <CursorPos X="78" Y="395"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
       </Unit75>
       <Unit76>
         <Filename Value="System\regexpr.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="RegExpr"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="586"/>
-        <CursorPos X="31" Y="615"/>
-        <UsageCount Value="20"/>
+        <EditorIndex Value="15"/>
+        <TopLine Value="1466"/>
+        <CursorPos Y="1497"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
       </Unit76>
       <Unit77>
         <Filename Value="System\regexpr_compilers.inc"/>
@@ -772,7 +807,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="170"/>
         <CursorPos X="19" Y="234"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="26"/>
       </Unit77>
       <Unit78>
         <Filename Value="C:\ProgramData\Lazarus\fpc\3.0.4\source\packages\regexpr\src\regexpr.pas"/>
@@ -788,44 +823,185 @@
         <CursorPos X="13" Y="7"/>
         <UsageCount Value="10"/>
       </Unit79>
+      <Unit80>
+        <Filename Value="C:\ProgramData\Lazarus\fpc\3.0.4\source\rtl\inc\systemh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="426"/>
+        <CursorPos X="103" Y="431"/>
+        <UsageCount Value="11"/>
+      </Unit80>
+      <Unit81>
+        <Filename Value="C:\ProgramData\Lazarus64\fpc\3.0.4\source\packages\amunits\examples\bezier.pas"/>
+        <UnitName Value="Bezier"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit81>
+      <Unit82>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\include\rasterimage.inc"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="920"/>
+        <CursorPos X="96" Y="949"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit82>
+      <Unit83>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\graphics.pp"/>
+        <UnitName Value="Graphics"/>
+        <EditorIndex Value="12"/>
+        <TopLine Value="19"/>
+        <CursorPos X="49" Y="42"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit83>
+      <Unit84>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\lresources.pp"/>
+        <UnitName Value="LResources"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="19"/>
+        <UsageCount Value="10"/>
+      </Unit84>
+      <Unit85>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\lcltype.pp"/>
+        <UnitName Value="LCLType"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="1187"/>
+        <CursorPos X="9" Y="1224"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit85>
     </Units>
-    <JumpHistory Count="8" HistoryIndex="7">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="aporender.lpr"/>
-        <Caret Line="86" Column="56" TopLine="55"/>
+        <Filename Value="Main.pas"/>
+        <Caret Line="226" TopLine="178"/>
       </Position1>
       <Position2>
-        <Filename Value="aporender.lpr"/>
-        <Caret Line="88" Column="32" TopLine="55"/>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\include\rasterimage.inc"/>
+        <Caret Line="970" TopLine="920"/>
       </Position2>
       <Position3>
-        <Filename Value="aporender.lpr"/>
-        <Caret Line="317" Column="57"/>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\include\rasterimage.inc"/>
+        <Caret Line="971" TopLine="920"/>
       </Position3>
       <Position4>
-        <Filename Value="aporender.lpr"/>
-        <Caret Line="34" Column="129" TopLine="8"/>
+        <Filename Value="Main.pas"/>
+        <Caret Line="227" TopLine="178"/>
       </Position4>
       <Position5>
-        <Filename Value="System\LibXmlComps.pas"/>
-        <Caret Line="32" Column="40" TopLine="11"/>
+        <Filename Value="Main.pas"/>
+        <Caret Line="228" TopLine="178"/>
       </Position5>
       <Position6>
-        <Filename Value="aporender.lpr"/>
-        <Caret Line="13" Column="56" TopLine="7"/>
+        <Filename Value="Main.pas"/>
+        <Caret Line="230" TopLine="178"/>
       </Position6>
       <Position7>
-        <Filename Value="System\LibXmlComps.pas"/>
-        <Caret Line="69" Column="33"/>
+        <Filename Value="Main.pas"/>
+        <Caret Line="231" TopLine="178"/>
       </Position7>
       <Position8>
-        <Filename Value="Core\Translation.pas"/>
-        <Caret Line="26" Column="120"/>
+        <Filename Value="Renderer\ImageMaker.pas"/>
+        <Caret Line="134" TopLine="98"/>
       </Position8>
+      <Position9>
+        <Filename Value="Renderer\ImageMaker.pas"/>
+        <Caret Line="135" TopLine="98"/>
+      </Position9>
+      <Position10>
+        <Filename Value="Renderer\ImageMaker.pas"/>
+        <Caret Line="136" TopLine="98"/>
+      </Position10>
+      <Position11>
+        <Filename Value="Renderer\ImageMaker.pas"/>
+        <Caret Line="137" TopLine="98"/>
+      </Position11>
+      <Position12>
+        <Filename Value="Renderer\ImageMaker.pas"/>
+        <Caret Line="138" TopLine="98"/>
+      </Position12>
+      <Position13>
+        <Filename Value="Renderer\ImageMaker.pas"/>
+        <Caret Line="139" TopLine="98"/>
+      </Position13>
+      <Position14>
+        <Filename Value="Renderer\ImageMaker.pas"/>
+        <Caret Line="140" TopLine="98"/>
+      </Position14>
+      <Position15>
+        <Filename Value="Renderer\ImageMaker.pas"/>
+        <Caret Line="136" TopLine="98"/>
+      </Position15>
+      <Position16>
+        <Filename Value="Renderer\ImageMaker.pas"/>
+        <Caret Line="112" Column="71" TopLine="95"/>
+      </Position16>
+      <Position17>
+        <Filename Value="Renderer\ImageMaker.pas"/>
+        <Caret Line="120" Column="45" TopLine="88"/>
+      </Position17>
+      <Position18>
+        <Filename Value="Renderer\ImageMaker.pas"/>
+        <Caret Line="122" Column="72"/>
+      </Position18>
+      <Position19>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\graphics.pp"/>
+        <Caret Line="42" Column="49" TopLine="19"/>
+      </Position19>
+      <Position20>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\include\rasterimage.inc"/>
+        <Caret Line="949" Column="96" TopLine="920"/>
+      </Position20>
+      <Position21>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\lcltype.pp"/>
+        <Caret Line="1218" Column="4" TopLine="1187"/>
+      </Position21>
+      <Position22>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\lcltype.pp"/>
+        <Caret Line="1219" Column="6" TopLine="1187"/>
+      </Position22>
+      <Position23>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\lcltype.pp"/>
+        <Caret Line="1224" Column="3" TopLine="1187"/>
+      </Position23>
+      <Position24>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\lcltype.pp"/>
+        <Caret Line="2173" Column="65" TopLine="2106"/>
+      </Position24>
+      <Position25>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\lcltype.pp"/>
+        <Caret Line="2344" Column="31" TopLine="2305"/>
+      </Position25>
+      <Position26>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\lcltype.pp"/>
+        <Caret Line="2345" Column="13" TopLine="2305"/>
+      </Position26>
+      <Position27>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\lcltype.pp"/>
+        <Caret Line="1218" Column="27" TopLine="1187"/>
+      </Position27>
+      <Position28>
+        <Filename Value="C:\ProgramData\Lazarus64\lcl\lcltype.pp"/>
+        <Caret Line="1219" Column="12" TopLine="1187"/>
+      </Position28>
+      <Position29>
+        <Filename Value="Core\Translation.pas"/>
+        <Caret Line="591" Column="23" TopLine="541"/>
+      </Position29>
+      <Position30>
+        <Filename Value="Core\Translation.pas"/>
+        <Caret Line="589" Column="44" TopLine="539"/>
+      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes Count="0" ActiveMode=""/>
     </RunParams>
   </ProjectSession>
+  <Debugging>
+    <Watches Count="1">
+      <Item1>
+        <Expression Value="e"/>
+      </Item1>
+    </Watches>
+  </Debugging>
 </CONFIG>

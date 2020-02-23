@@ -173,7 +173,7 @@ implementation
     FormatSettings.DecimalSeparator := '.';
 
     LogWrite('INFO|Reading parameters', 'general.log');
-    G_Flame.Destroy;
+    if (G_Flame <> nil) then G_Flame.Destroy;
     G_Flame := TControlPoint.Create;
     LoadCpFromXmlCompatible(input, G_Flame, status);
 
@@ -184,18 +184,20 @@ implementation
     if G_SizeX <= 0 then G_SizeX := G_Flame.Width;
     if G_SizeY <= 0 then G_SizeY := G_Flame.Height;
     if G_Oversample <= 0 then G_Oversample := G_Flame.spatial_oversample;
-    
 
-    G_Flame.AdjustScale(G_SizeX, G_SizeY);
-    G_Flame.Width := G_SizeX;
-    G_Flame.Height := G_SizeY;
-    G_Flame.spatial_oversample := G_Oversample;
-    G_Flame.spatial_filter_radius := G_FilterRadius;
-    G_Flame.sample_density := G_SamplesPerPixel;
-    G_Flame.transparency := false;
+    if (G_Flame <> nil) then
+    begin
+      G_Flame.AdjustScale(G_SizeX, G_SizeY);
+      G_Flame.Width := G_SizeX;
+      G_Flame.Height := G_SizeY;
+      G_Flame.spatial_oversample := G_Oversample;
+      G_Flame.spatial_filter_radius := G_FilterRadius;
+      G_Flame.sample_density := G_SamplesPerPixel;
+      G_Flame.transparency := false;
+    end;
 
-    G_Renderer.SetCP(G_Flame);
-    G_ImageMaker.SetCP(G_Flame);
+    if (G_Renderer <> nil) then G_Renderer.SetCP(G_Flame);
+    if (G_ImageMaker <> nil) then G_ImageMaker.SetCP(G_Flame);
   end;
 ////////////////////////////////////////////////////////////////////////////////////////
   procedure InternalInitializePlugin(directory, filename: PChar); stdcall;

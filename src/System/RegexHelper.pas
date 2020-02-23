@@ -32,7 +32,7 @@ begin
   Regex.ModifierStr := 'si';
   Regex.InputString := Utf8String(text);
 
-  if Regex.ExecNext and (Regex.SubExprMatchCount >= group) then
+  if Regex.Exec and (Regex.SubExprMatchCount >= group) then
     Result := String(Regex.Match[group])
   else Result := def;
 

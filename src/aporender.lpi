@@ -34,327 +34,315 @@
         <PackageName Value="LCLBase"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="78">
+    <Units Count="75">
       <Unit0>
         <Filename Value="aporender.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="System\AsmRandom.pas"/>
+        <Filename Value="IO\Binary.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit1>
       <Unit2>
-        <Filename Value="IO\Binary.pas"/>
+        <Filename Value="Core\Translation.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit2>
       <Unit3>
-        <Filename Value="Core\Translation.pas"/>
+        <Filename Value="System\RegexHelper.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="System\LibXmlComps.pas"/>
+        <Filename Value="Core\Global.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit4>
       <Unit5>
-        <Filename Value="System\LibXmlParser.pas"/>
+        <Filename Value="IO\MissingPlugin.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="System\RegexHelper.pas"/>
+        <Filename Value="IO\Regstry.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit6>
       <Unit7>
-        <Filename Value="Core\Global.pas"/>
+        <Filename Value="IO\ParameterIO.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit7>
       <Unit8>
-        <Filename Value="IO\MissingPlugin.pas"/>
+        <Filename Value="Core\Bezier.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit8>
       <Unit9>
-        <Filename Value="IO\Regstry.pas"/>
+        <Filename Value="Flame\RndFlame.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit9>
       <Unit10>
-        <Filename Value="IO\ParameterIO.pas"/>
+        <Filename Value="Flame\ControlPoint.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
       <Unit11>
-        <Filename Value="Core\Bezier.pas"/>
+        <Filename Value="ColorMap\cmapdata.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit11>
       <Unit12>
-        <Filename Value="Flame\RndFlame.pas"/>
+        <Filename Value="ColorMap\cmap.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit12>
       <Unit13>
-        <Filename Value="Flame\ControlPoint.pas"/>
+        <Filename Value="ColorMap\GradientHlpr.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit13>
       <Unit14>
-        <Filename Value="ColorMap\cmapdata.pas"/>
+        <Filename Value="Core\XFormMan.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit14>
       <Unit15>
-        <Filename Value="ColorMap\cmap.pas"/>
+        <Filename Value="Flame\XForm.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit15>
       <Unit16>
-        <Filename Value="ColorMap\GradientHlpr.pas"/>
+        <Filename Value="Core\BaseVariation.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit16>
       <Unit17>
-        <Filename Value="Core\XFormMan.pas"/>
+        <Filename Value="Renderer\RenderingCommon.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit17>
       <Unit18>
-        <Filename Value="Flame\XForm.pas"/>
+        <Filename Value="Renderer\RenderingInterface.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit18>
       <Unit19>
-        <Filename Value="Core\BaseVariation.pas"/>
+        <Filename Value="Renderer\RenderingImplementation.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit19>
       <Unit20>
-        <Filename Value="Renderer\RenderingCommon.pas"/>
+        <Filename Value="Renderer\BucketFillerThread.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit20>
       <Unit21>
-        <Filename Value="Renderer\RenderingInterface.pas"/>
+        <Filename Value="Renderer\ImageMaker.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit21>
       <Unit22>
-        <Filename Value="Renderer\RenderingImplementation.pas"/>
+        <Filename Value="Variations\varHemisphere.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit22>
       <Unit23>
-        <Filename Value="Renderer\BucketFillerThread.pas"/>
+        <Filename Value="Variations\varLog.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit23>
       <Unit24>
-        <Filename Value="Renderer\ImageMaker.pas"/>
+        <Filename Value="Variations\varPolar2.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit24>
       <Unit25>
-        <Filename Value="Variations\varHemisphere.pas"/>
+        <Filename Value="Variations\varRings2.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit25>
       <Unit26>
-        <Filename Value="Variations\varLog.pas"/>
+        <Filename Value="Variations\varFan2.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit26>
       <Unit27>
-        <Filename Value="Variations\varPolar2.pas"/>
+        <Filename Value="Variations\varCross.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit27>
       <Unit28>
-        <Filename Value="Variations\varRings2.pas"/>
+        <Filename Value="Variations\varWedge.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit28>
       <Unit29>
-        <Filename Value="Variations\varFan2.pas"/>
+        <Filename Value="Variations\varEpispiral.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit29>
       <Unit30>
-        <Filename Value="Variations\varCross.pas"/>
+        <Filename Value="Variations\varBwraps.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit30>
       <Unit31>
-        <Filename Value="Variations\varWedge.pas"/>
+        <Filename Value="Variations\varpdj.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit31>
       <Unit32>
-        <Filename Value="Variations\varEpispiral.pas"/>
+        <Filename Value="Variations\varJuliaN.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit32>
       <Unit33>
-        <Filename Value="Variations\varBwraps.pas"/>
+        <Filename Value="Variations\varJuliaScope.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit33>
       <Unit34>
-        <Filename Value="Variations\varpdj.pas"/>
+        <Filename Value="Variations\varJulia3Djf.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit34>
       <Unit35>
-        <Filename Value="Variations\varJuliaN.pas"/>
+        <Filename Value="Variations\varJulia3Dz.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit35>
       <Unit36>
-        <Filename Value="Variations\varJuliaScope.pas"/>
+        <Filename Value="Variations\varCurl.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit36>
       <Unit37>
-        <Filename Value="Variations\varJulia3Djf.pas"/>
+        <Filename Value="Variations\varCurl3D.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit37>
       <Unit38>
-        <Filename Value="Variations\varJulia3Dz.pas"/>
+        <Filename Value="Variations\varRadialBlur.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit38>
       <Unit39>
-        <Filename Value="Variations\varCurl.pas"/>
+        <Filename Value="Variations\varBlurCircle.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit39>
       <Unit40>
-        <Filename Value="Variations\varCurl3D.pas"/>
+        <Filename Value="Variations\varBlurZoom.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit40>
       <Unit41>
-        <Filename Value="Variations\varRadialBlur.pas"/>
+        <Filename Value="Variations\varBlurPixelize.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit41>
       <Unit42>
-        <Filename Value="Variations\varBlurCircle.pas"/>
+        <Filename Value="Variations\varFalloff2.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit42>
       <Unit43>
-        <Filename Value="Variations\varBlurZoom.pas"/>
+        <Filename Value="Variations\varRectangles.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit43>
       <Unit44>
-        <Filename Value="Variations\varBlurPixelize.pas"/>
+        <Filename Value="Variations\varSplits.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit44>
       <Unit45>
-        <Filename Value="Variations\varFalloff2.pas"/>
+        <Filename Value="Variations\varSeparation.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit45>
       <Unit46>
-        <Filename Value="Variations\varRectangles.pas"/>
+        <Filename Value="Variations\varBipolar.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit46>
       <Unit47>
-        <Filename Value="Variations\varSplits.pas"/>
+        <Filename Value="Variations\varLoonie.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit47>
       <Unit48>
-        <Filename Value="Variations\varSeparation.pas"/>
+        <Filename Value="Variations\varEscher.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit48>
       <Unit49>
-        <Filename Value="Variations\varBipolar.pas"/>
+        <Filename Value="Variations\varScry.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit49>
       <Unit50>
-        <Filename Value="Variations\varLoonie.pas"/>
+        <Filename Value="Variations\varNGon.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit50>
       <Unit51>
-        <Filename Value="Variations\varEscher.pas"/>
+        <Filename Value="Variations\varFoci.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit51>
       <Unit52>
-        <Filename Value="Variations\varScry.pas"/>
+        <Filename Value="Variations\varLazysusan.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit52>
       <Unit53>
-        <Filename Value="Variations\varNGon.pas"/>
+        <Filename Value="Variations\varMobius.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit53>
       <Unit54>
-        <Filename Value="Variations\varFoci.pas"/>
+        <Filename Value="Variations\varCrop.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit54>
       <Unit55>
-        <Filename Value="Variations\varLazysusan.pas"/>
+        <Filename Value="Variations\varElliptic.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit55>
       <Unit56>
-        <Filename Value="Variations\varMobius.pas"/>
+        <Filename Value="Variations\varWaves2.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit56>
       <Unit57>
-        <Filename Value="Variations\varCrop.pas"/>
+        <Filename Value="Variations\varAuger.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit57>
       <Unit58>
-        <Filename Value="Variations\varElliptic.pas"/>
+        <Filename Value="Variations\varPreSpherical.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit58>
       <Unit59>
-        <Filename Value="Variations\varWaves2.pas"/>
+        <Filename Value="Variations\varPreSinusoidal.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit59>
       <Unit60>
-        <Filename Value="Variations\varAuger.pas"/>
+        <Filename Value="Variations\varPreDisc.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit60>
       <Unit61>
-        <Filename Value="Variations\varPreSpherical.pas"/>
+        <Filename Value="Variations\varPreBwraps.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit61>
       <Unit62>
-        <Filename Value="Variations\varPreSinusoidal.pas"/>
+        <Filename Value="Variations\varPreCrop.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit62>
       <Unit63>
-        <Filename Value="Variations\varPreDisc.pas"/>
+        <Filename Value="Variations\varPreFalloff2.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit63>
       <Unit64>
-        <Filename Value="Variations\varPreBwraps.pas"/>
+        <Filename Value="Variations\varPostBwraps.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit64>
       <Unit65>
-        <Filename Value="Variations\varPreCrop.pas"/>
+        <Filename Value="Variations\varPostCurl.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit65>
       <Unit66>
-        <Filename Value="Variations\varPreFalloff2.pas"/>
+        <Filename Value="Variations\varPostCurl3D.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit66>
       <Unit67>
-        <Filename Value="Variations\varPostBwraps.pas"/>
+        <Filename Value="Variations\varPostCrop.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit67>
       <Unit68>
-        <Filename Value="Variations\varPostCurl.pas"/>
+        <Filename Value="Variations\varPostFalloff2.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit68>
       <Unit69>
-        <Filename Value="Variations\varPostCurl3D.pas"/>
+        <Filename Value="Variations\varGenericPlugin.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit69>
       <Unit70>
-        <Filename Value="Variations\varPostCrop.pas"/>
+        <Filename Value="Core\Logging.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit70>
       <Unit71>
-        <Filename Value="Variations\varPostFalloff2.pas"/>
+        <Filename Value="Main.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit71>
       <Unit72>
-        <Filename Value="Variations\varGenericPlugin.pas"/>
+        <Filename Value="Params.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit72>
       <Unit73>
-        <Filename Value="Core\Logging.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit73>
-      <Unit74>
-        <Filename Value="Main.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit74>
-      <Unit75>
-        <Filename Value="Params.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit75>
-      <Unit76>
         <Filename Value="System\regexpr.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="RegExpr"/>
-      </Unit76>
-      <Unit77>
+      </Unit73>
+      <Unit74>
         <Filename Value="System\regexpr_compilers.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit77>
+      </Unit74>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="..\target\debug\aporender.x86"/>
+      <Filename Value="..\target\debug\aporender-x86"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
@@ -375,7 +363,9 @@
         <StackChecks Value="True"/>
       </Checks>
       <VerifyObjMethodCallValidity Value="True"/>
+      <TargetProcessor Value="pentium4"/>
       <TargetCPU Value="i386"/>
+      <TargetOS Value="win32"/>
     </CodeGeneration>
     <Linking>
       <Debugging>
@@ -388,6 +378,16 @@
         <ExecutableType Value="Library"/>
       </Options>
     </Linking>
+    <Other>
+      <Verbosity>
+        <ShowNotes Value="False"/>
+        <ShowHints Value="False"/>
+      </Verbosity>
+      <WriteFPCLogo Value="False"/>
+      <CompilerMessages>
+        <IgnoredMessages idx11049="True" idx11046="True" idx11031="True" idx11030="True" idx11020="True" idx11017="True" idx11007="True" idx11005="True" idx9033="True" idx7080="True" idx7039="True" idx6048="True" idx6017="True" idx5073="True" idx5072="True" idx5071="True" idx5062="True" idx5060="True" idx5058="True" idx5057="True" idx5039="True" idx5031="True" idx5030="True" idx5029="True" idx5028="True" idx5027="True" idx5026="True" idx5025="True" idx5024="True" idx5023="True" idx5003="True" idx4081="True" idx4080="True" idx4079="True" idx4055="True" idx4049="True" idx4047="True" idx4035="True" idx4015="True" idx3280="True" idx3274="True" idx3270="True" idx3250="True" idx3189="True" idx3187="True" idx3126="True" idx3124="True" idx3123="True" idx3031="True" idx3023="True" idx3020="True" idx2073="True" idx2048="True" idx2047="True" idx2026="True" idx2025="True" idx2008="True"/>
+      </CompilerMessages>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

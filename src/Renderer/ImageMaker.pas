@@ -116,14 +116,18 @@ constructor TImageMaker.Create;
 var
   i: integer;
 begin
+
   AlphaPalette.logpal.palVersion := $300;
   AlphaPalette.logpal.palNumEntries := 256;
-  for i := 0 to 255 do
+
+  (*
+  for i := 0 to SizeOf(AlphaPalette.logpal.palPalEntry) do
     with AlphaPalette.logpal.palPalEntry[i] do begin
       peRed := i;
       peGreen := i;
       peBlue := i;
     end;
+  *)
 end;
 
 ///////////////////////////////////////////////////////////////////////////////
